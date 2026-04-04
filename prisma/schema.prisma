@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id           // Clerk user ID (e.g. "user_2abc...")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  agents    Agent[]
+}
+
+model Agent {
+  id          String   @id @default("")
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String   @default("")
+  description String?
+  language    String   @default("pt-BR")
+  tone        String   @default("amigavel")
+  model       String   @default("gpt-4o")
+  temperature Float    @default(0.7)
+  maxTokens      Int      @default(300)
+  systemPrompt   String?
+  greetingPrompt String?
+  fallbackPrompt String?
+  createdAt      DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
