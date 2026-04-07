@@ -51,9 +51,16 @@ const TONE_LABELS: Record<string, string> = {
   confiante: "Confiante",
 }
 
+const PROVIDER_OPTIONS = [
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "twilio", label: "Twilio" },
+]
+
 type AgentDefaults = {
   name?: string
   description?: string | null
+  phoneNumber?: string | null
+  provider?: string | null
   language?: string
   tone?: string
   model?: string
@@ -105,6 +112,9 @@ function SubmitButton() {
 export function AgentForm({ action, defaultValues }: AgentFormProps) {
   const [state, formAction] = useActionState(action, {})
 
+  const [provider, setProvider] = useState(
+    defaultValues?.provider ?? ""
+  )
   const [language, setLanguage] = useState(
     defaultValues?.language ?? AGENT_DEFAULTS.language
   )
@@ -151,6 +161,33 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
               placeholder="Descreva a finalidade deste agente..."
               defaultValue={defaultValues?.description ?? ""}
             />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="phoneNumber">Número de Telefone</Label>
+              <Input
+                id="phoneNumber"
+                name="phoneNumber"
+                placeholder="+55 11 99999-9999"
+                defaultValue={defaultValues?.phoneNumber ?? ""}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>Provider</Label>
+              <Select value={provider} onValueChange={setProvider}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {PROVIDER_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input type="hidden" name="provider" value={provider} />
+            </div>
           </div>
         </div>
       </FormSection>

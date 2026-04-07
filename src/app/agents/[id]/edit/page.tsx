@@ -23,6 +23,8 @@ export default async function EditAgentPage({ params }: EditAgentPageProps) {
           defaultValues={{
             name: agent.name,
             description: agent.description,
+            phoneNumber: agent.phoneNumber,
+            provider: agent.provider,
             language: agent.language,
             tone: agent.tone,
             model: agent.model,

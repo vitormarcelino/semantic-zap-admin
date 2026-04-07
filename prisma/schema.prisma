@@ -28,11 +28,37 @@ model Agent {
   model       String   @default("gpt-4o")
   temperature Float    @default(0.7)
   maxTokens      Int      @default(300)
+  phoneNumber    String?
+  provider       String?
   systemPrompt   String?
   greetingPrompt String?
   fallbackPrompt String?
+  conversations  Conversation[]
   createdAt      DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([userId])
+}
+
+model Conversation {
+  id            String    @id @default(cuid())
+  agentId       String
+  phoneNumber   String
+  status        String    @default("active")
+  lastMessageAt DateTime  @default(now())
+  messages      Message[]
+  agent         Agent     @relation(fields: [agentId], references: [id])
+
+  @@unique([agentId, phoneNumber])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  role           String       // "user" | "assistant"
+  content        String
+  status         String       @default("pending") // pending | processing | sent | failed
+  wamid          String?      @unique              // WhatsApp message ID or Twilio SmsSid — used for deduplication
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
 }

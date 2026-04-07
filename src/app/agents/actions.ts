@@ -66,6 +66,8 @@ export async function createAgent(
       maxTokens:
         parseInt(formData.get("maxTokens") as string) ||
         AGENT_DEFAULTS.maxTokens,
+      phoneNumber: (formData.get("phoneNumber") as string) || null,
+      provider: (formData.get("provider") as string) || null,
       systemPrompt: (formData.get("systemPrompt") as string) || null,
       greetingPrompt: (formData.get("greetingPrompt") as string) || null,
       fallbackPrompt: (formData.get("fallbackPrompt") as string) || null,
@@ -102,6 +104,8 @@ export async function updateAgent(
       maxTokens:
         parseInt(formData.get("maxTokens") as string) ||
         AGENT_DEFAULTS.maxTokens,
+      phoneNumber: (formData.get("phoneNumber") as string) || null,
+      provider: (formData.get("provider") as string) || null,
       systemPrompt: (formData.get("systemPrompt") as string) || null,
       greetingPrompt: (formData.get("greetingPrompt") as string) || null,
       fallbackPrompt: (formData.get("fallbackPrompt") as string) || null,
