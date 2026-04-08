@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { validateTwilioSignature } from "@/lib/webhook/twilio-validator"
 import { parseTwilioPayload } from "@/lib/webhook/parse-twilio"
 import { enqueueMessage } from "@/lib/queue/producer"
+import { publishSSEEvent } from "@/lib/realtime/publisher"
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   // 1. Read raw body (application/x-www-form-urlencoded)
@@ -70,7 +71,37 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return new NextResponse("", { status: 200 })
   }
 
-  // 7. Enqueue for agent processing
+  // 7. Mode check — if human mode, skip enqueue and notify dashboard instead
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    select: { mode: true },
+  })
+
+  if (conversation?.mode === "human") {
+    await prisma.conversation.update({
+      where: { id: conversationId },
+      data: { unreadCount: { increment: 1 } },
+    })
+    await publishSSEEvent({
+      type: "new_message",
+      conversationId,
+      payload: {
+        message: {
+          id: messageId,
+          role: "user",
+          content: msg.body,
+          status: "pending",
+          sentBy: null,
+          deliveredAt: null,
+          readAt: null,
+          createdAt: new Date().toISOString(),
+        },
+      },
+    })
+    return new NextResponse("", { status: 200 })
+  }
+
+  // 8. Enqueue for agent processing
   try {
     await enqueueMessage({ messageId, conversationId, agentId: agent.id })
   } catch (err) {

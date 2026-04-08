@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { getAgentConfig, setAgentConfig, type AgentConfig } from "@/lib/cache/agent-config"
 import { sendMessage } from "@/lib/sender"
 import { splitMessage } from "@/lib/sender/split-message"
+import { publishSSEEvent } from "@/lib/realtime/publisher"
 import type { EnqueuePayload } from "@/lib/webhook/types"
 
 const PYTHON_TIMEOUT_MS = 55_000
@@ -41,13 +42,23 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
     return
   }
 
-  // 2. Idempotency guard — already successfully processed
+  // 2. Mode check — operator has taken over; discard job silently (no retry)
+  // Using $queryRaw because the Prisma client types are regenerated after migration
+  const modeRows = await prisma.$queryRaw<Array<{ mode: string }>>`
+    SELECT mode FROM "Conversation" WHERE id = ${conversationId}
+  `
+  if (modeRows[0]?.mode === "human") {
+    console.log(`[worker] job discarded: conversation ${conversationId} is in human mode`)
+    return
+  }
+
+  // 3. Idempotency guard — already successfully processed
   if (record.status === "sent") {
     console.warn(`[worker] message ${messageId} already sent — skipping`)
     return
   }
 
-  // 3. Mark as processing
+  // 4. Mark as processing
   await prisma.message.update({
     where: { id: messageId },
     data: { status: "processing" },
@@ -119,10 +130,20 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
       console.warn(`[worker] Python returned empty reply for message ${messageId} — using fallback`)
     }
 
-    // 7. Split into chunks
+    // 7. Re-check mode before sending — operator may have taken over during the Python call
+    const freshModeRows = await prisma.$queryRaw<Array<{ mode: string }>>`
+      SELECT mode FROM "Conversation" WHERE id = ${conversationId}
+    `
+    if (freshModeRows[0]?.mode === "human") {
+      console.log(`[worker] discarding reply: conversation ${conversationId} switched to human mode during LLM call`)
+      await prisma.message.update({ where: { id: messageId }, data: { status: "sent" } })
+      return
+    }
+
+    // 8. Split into chunks
     const parts = splitMessage(reply)
 
-    // 8. Send via the appropriate provider
+    // 9. Send via the appropriate provider
     await sendMessage({
       provider: record.conversation.agent.provider,
       to: record.conversation.phoneNumber,
@@ -130,14 +151,15 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
       parts,
     })
 
-    // 9. Persist assistant message + update statuses
-    await prisma.$transaction([
+    // 10. Persist assistant message + update statuses
+    const [assistantMessage] = await prisma.$transaction([
       prisma.message.create({
         data: {
           conversationId,
           role: "assistant",
           content: reply,
           status: "sent",
+          sentBy: "bot",
         },
       }),
       prisma.message.update({
@@ -150,7 +172,23 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
       }),
     ])
 
-    // 10. TODO: emit realtime event (Pusher/Ably) once Phase 3 realtime is implemented
+    // 11. Emit SSE event so the dashboard updates in real time
+    await publishSSEEvent({
+      type: "new_message",
+      conversationId,
+      payload: {
+        message: {
+          id: assistantMessage.id,
+          role: "assistant",
+          content: reply,
+          status: "sent",
+          sentBy: "bot",
+          deliveredAt: null,
+          readAt: null,
+          createdAt: assistantMessage.createdAt.toISOString(),
+        },
+      },
+    })
 
   } catch (err) {
     // Reset to "pending" so the next BullMQ retry attempt can re-run the full flow

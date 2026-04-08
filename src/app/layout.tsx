@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { DM_Sans, JetBrains_Mono } from "next/font/google"
 import { ClerkProvider } from "@clerk/nextjs"
+import { Providers } from "./providers"
 import "./globals.css"
 
 const dmSans = DM_Sans({
@@ -33,7 +34,9 @@ export default function RootLayout({
         lang="pt-BR"
         className={`${dmSans.variable} ${jetbrainsMono.variable} h-full`}
       >
-        <body className="min-h-full flex flex-col">{children}</body>
+        <body className="min-h-full flex flex-col">
+          <Providers>{children}</Providers>
+        </body>
       </html>
     </ClerkProvider>
   )

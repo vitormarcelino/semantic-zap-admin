@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../src/generated/prisma-client"
 }
 
 datasource db {
@@ -46,6 +46,9 @@ model Conversation {
   phoneNumber   String
   status        String    @default("active")
   lastMessageAt DateTime  @default(now())
+  mode          String    @default("bot")   // "bot" | "human"
+  assignedTo    String?                      // operator display name or ID
+  unreadCount   Int       @default(0)        // user messages without operator reply (human mode only)
   messages      Message[]
   agent         Agent     @relation(fields: [agentId], references: [id])
 
@@ -59,6 +62,9 @@ model Message {
   content        String
   status         String       @default("pending") // pending | processing | sent | failed
   wamid          String?      @unique              // WhatsApp message ID or Twilio SmsSid — used for deduplication
+  sentBy         String?                           // "bot" | "operator:{userId}" | null for user messages
+  deliveredAt    DateTime?                         // set when Meta delivery webhook fires (WhatsApp only)
+  readAt         DateTime?                         // set when Meta read receipt webhook fires (WhatsApp only)
   createdAt      DateTime     @default(now())
   conversation   Conversation @relation(fields: [conversationId], references: [id])
 }
