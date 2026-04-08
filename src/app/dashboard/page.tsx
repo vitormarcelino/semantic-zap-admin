@@ -1,71 +1,93 @@
-import { MessageSquare, Activity, Bot } from "lucide-react"
+import { auth } from "@clerk/nextjs/server"
+import { redirect } from "next/navigation"
+import { Suspense } from "react"
 import { Shell } from "@/components/layout/shell"
-import { MetricCard } from "@/components/common/metric-card"
-import { AgentCard } from "@/components/agents/agent-card"
-import { SignOutButton } from "@/components/layout/sign-out-button"
+import { PeriodSelector } from "@/components/dashboard/period-selector"
+import { KpiGrid } from "@/components/dashboard/kpi-grid"
+import { ChartsSection } from "@/components/dashboard/charts-section"
+import { AgentGrid } from "@/components/dashboard/agent-grid"
+import { ActivityFeed } from "@/components/dashboard/activity-feed"
+import { parsePeriod, getPeriodRange } from "@/lib/dashboard/period"
+import { getDashboardSummary, getDashboardAgents } from "@/lib/dashboard/queries"
+import { getDashboardCache, setDashboardCache } from "@/lib/dashboard/cache"
+import type { DashboardSummary, AgentMetrics } from "@/lib/dashboard/queries"
 
-const MOCK_AGENTS = [
-  {
-    id: "1",
-    name: "Suporte Principal",
-    phone: "+55 11 98765-4321",
-    status: "online" as const,
-    messagesCount: 1284,
-    conversationsCount: 47,
-    avgResponse: "1m 23s",
-  },
-  {
-    id: "2",
-    name: "Vendas & Promoções",
-    phone: "+55 11 97654-3210",
-    status: "warning" as const,
-    messagesCount: 558,
-    conversationsCount: 26,
-    avgResponse: "3m 45s",
-  },
-]
+interface DashboardPageProps {
+  searchParams: Promise<{ period?: string }>
+}
 
-export default function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: DashboardPageProps) {
+  const { userId } = await auth()
+  if (!userId) redirect("/sign-in")
+
+  const { period: rawPeriod } = await searchParams
+  const period = parsePeriod(rawPeriod)
+
+  const [summary, agents] = await Promise.all([
+    (async () => {
+      const cached = await getDashboardCache<DashboardSummary>(
+        userId,
+        period,
+        "summary"
+      )
+      if (cached) return cached
+      const range = getPeriodRange(period)
+      const data = await getDashboardSummary(userId, period, range)
+      await setDashboardCache(userId, period, "summary", data)
+      return data
+    })(),
+    (async () => {
+      const cached = await getDashboardCache<{ agents: AgentMetrics[] }>(
+        userId,
+        period,
+        "agents"
+      )
+      if (cached) return cached.agents
+      const { from, to } = getPeriodRange(period)
+      const data = await getDashboardAgents(userId, from, to)
+      await setDashboardCache(userId, period, "agents", { period, agents: data })
+      return data
+    })(),
+  ])
+
   return (
-    <Shell title="Dashboard" actions={<SignOutButton />}>
+    <Shell
+      title="Dashboard"
+      actions={
+        <Suspense>
+          <PeriodSelector period={period} />
+        </Suspense>
+      }
+    >
       <div className="flex flex-col gap-8">
-        {/* Metrics */}
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <MetricCard
-            value="1.842"
-            label="Mensagens"
-            delta="12% vs ontem"
-            deltaType="up"
-            icon={MessageSquare}
-          />
-          <MetricCard
-            value="98%"
-            label="Uptime"
-            delta="0.3% vs semana"
-            deltaType="up"
-            icon={Activity}
-          />
-          <MetricCard
-            value="3"
-            label="Agentes ativos"
-            delta="1 desde ontem"
-            deltaType="up"
-            icon={Bot}
-          />
-        </section>
+        {/* KPI row */}
+        <KpiGrid kpis={summary.kpis} />
+
+        {/* Charts */}
+        <ChartsSection charts={summary.charts} period={period} />
 
         {/* Agents */}
         <section>
           <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/38">
             Agentes
           </h2>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {MOCK_AGENTS.map((agent) => (
-              <AgentCard key={agent.id} {...agent} />
-            ))}
+          <AgentGrid agents={agents} />
+        </section>
+
+        {/* Activity feed */}
+        <section>
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/38">
+            Atividade recente
+          </h2>
+          <div className="rounded-xl border border-white/8 bg-[#1F2535] px-5">
+            <ActivityFeed items={summary.recentActivity} />
           </div>
         </section>
       </div>
     </Shell>
   )
 }
+
+export const dynamic = "force-dynamic"

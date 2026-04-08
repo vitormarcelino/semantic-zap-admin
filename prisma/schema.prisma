@@ -67,4 +67,7 @@ model Message {
   readAt         DateTime?                         // set when Meta read receipt webhook fires (WhatsApp only)
   createdAt      DateTime     @default(now())
   conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  @@index([createdAt])
+  @@index([conversationId, createdAt])
 }
