@@ -44,8 +44,11 @@ services:
       - .env.local
     environment:
       DATABASE_URL: postgresql://semanticzap:semanticzap@postgres:5432/semanticzap
-      REDIS_URL: redis://172.17.0.1:6379
+      REDIS_URL: redis://semanticzap-agent-service-redis-1:6379
       INTERNAL_API_BASE_URL: http://app:3000
+    networks:
+      - default
+      - agent-service
     command: >
       sh -c "
       if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then
@@ -74,6 +77,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+networks:
+  default: {}
+  agent-service:
+    external: true
+    name: semanticzap-agent-service_semanticzap
 
 volumes:
   app_node_modules:

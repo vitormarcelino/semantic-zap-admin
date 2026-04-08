@@ -7,8 +7,8 @@ import type { NormalizedMessage } from "./types"
  */
 export function parseTwilioPayload(params: Record<string, string>): NormalizedMessage | null {
   const body = params["Body"]?.trim()
-  const from = params["From"]?.replace(/^whatsapp:/i, "").replace(/\D/g, "")
-  const to = params["To"]?.replace(/^whatsapp:/i, "").replace(/\D/g, "")
+  const from = params["From"]?.replace(/^whatsapp:/i, "")
+  const to = params["To"]?.replace(/^whatsapp:/i, "")
   const smsSid = params["SmsSid"] ?? params["MessageSid"]
 
   if (!body || !from || !to || !smsSid) return null
