@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { Bot, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAgents } from "@/hooks/useConversations"
@@ -66,6 +67,12 @@ function AgentItem({ agent, isSelected, onClick }: AgentItemProps) {
 
 export function AgentSelector({ selectedAgentId, onSelect }: AgentSelectorProps) {
   const { data: agents, isLoading } = useAgents()
+
+  useEffect(() => {
+    if (!selectedAgentId && agents && agents.length > 0) {
+      onSelect(agents[0].id)
+    }
+  }, [selectedAgentId, agents, onSelect])
 
   return (
     <div className="flex h-full w-60 shrink-0 flex-col border-r border-white/8 bg-[#181C26]">

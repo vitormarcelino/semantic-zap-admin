@@ -96,7 +96,7 @@ export async function getConversationWithMessages(id: string, messagesPage = 1) 
     phoneNumber: conversation.phoneNumber,
     mode: conversation.mode as ConversationMode,
     assignedTo: conversation.assignedTo,
-    messages: conversation.messages.map((m) => ({
+    messages: conversation.messages.reverse().map((m) => ({
       id: m.id,
       conversationId: id,
       role: m.role as "user" | "assistant",
