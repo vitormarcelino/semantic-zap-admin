@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 import { uuidv7 } from "uuidv7"
 import { prisma } from "@/lib/prisma"
 import { AGENT_DEFAULTS } from "@/constants/agent"
+import { invalidateAgentConfig } from "@/lib/cache/agent-config"
 
 export type ActionState = {
   error?: string
@@ -112,11 +113,14 @@ export async function updateAgent(
     },
   })
 
+  await invalidateAgentConfig(id)
+
   redirect("/agents")
 }
 
 export async function deleteAgent(id: string): Promise<void> {
   const userId = await requireUserId()
   await prisma.agent.deleteMany({ where: { id, userId } })
+  await invalidateAgentConfig(id)
   revalidatePath("/agents")
 }

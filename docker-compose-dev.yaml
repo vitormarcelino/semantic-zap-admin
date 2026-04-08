@@ -11,6 +11,7 @@ services:
       - .env.local
     environment:
       DATABASE_URL: postgresql://semanticzap:semanticzap@postgres:5432/semanticzap
+      REDIS_URL: redis://172.17.0.1:6379
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
       NEXT_TELEMETRY_DISABLED: "1"
@@ -30,6 +31,32 @@ services:
       - ./:/app
       - app_node_modules:/app/node_modules
       - next_cache:/app/.next
+
+  worker:
+    image: node:22-alpine
+    working_dir: /app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+      - .env.local
+    environment:
+      DATABASE_URL: postgresql://semanticzap:semanticzap@postgres:5432/semanticzap
+      REDIS_URL: redis://172.17.0.1:6379
+      INTERNAL_API_BASE_URL: http://app:3000
+    command: >
+      sh -c "
+      if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then
+        npm ci;
+      fi &&
+      npx prisma generate &&
+      npm run worker:dev
+      "
+    volumes:
+      - ./:/app
+      - app_node_modules:/app/node_modules
 
   postgres:
     image: postgres:16-alpine
