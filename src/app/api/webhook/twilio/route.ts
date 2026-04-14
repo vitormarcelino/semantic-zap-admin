@@ -4,6 +4,7 @@ import { validateTwilioSignature } from "@/lib/webhook/twilio-validator"
 import { parseTwilioPayload } from "@/lib/webhook/parse-twilio"
 import { enqueueMessage } from "@/lib/queue/producer"
 import { publishSSEEvent } from "@/lib/realtime/publisher"
+import { isWithinLimit } from "@/lib/billing/limits"
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   // 1. Read raw body (application/x-www-form-urlencoded)
@@ -26,6 +27,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   })
   if (!agent) {
     console.warn(`[webhook/twilio] No agent found for number ${msg.to}`)
+    return new NextResponse("", { status: 200 })
+  }
+
+  // 4b. Check active conversation limit for the agent owner
+  const withinLimit = await isWithinLimit(agent.userId, "conversations").catch(() => true)
+  if (!withinLimit) {
+    console.log(`[webhook/twilio] Active conversation limit reached for user ${agent.userId} — discarding`)
     return new NextResponse("", { status: 200 })
   }
 

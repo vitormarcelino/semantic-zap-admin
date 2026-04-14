@@ -5,6 +5,7 @@ import { parseWhatsAppPayload } from "@/lib/webhook/parse-whatsapp"
 import { handleStatusUpdate, type MetaStatusUpdate } from "@/lib/webhook/handle-status-update"
 import { enqueueMessage } from "@/lib/queue/producer"
 import { publishSSEEvent } from "@/lib/realtime/publisher"
+import { isWithinLimit } from "@/lib/billing/limits"
 
 // Minimal typings for status entries in the Meta payload
 interface MetaValue {
@@ -75,6 +76,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   })
   if (!agent) {
     console.warn(`[webhook/whatsapp] No agent found for number ${msg.to}`)
+    return new NextResponse("OK", { status: 200 })
+  }
+
+  // 6b. Check active conversation limit for the agent owner
+  const withinLimit = await isWithinLimit(agent.userId, "conversations").catch(() => true)
+  if (!withinLimit) {
+    console.log(`[webhook/whatsapp] Active conversation limit reached for user ${agent.userId} — discarding`)
     return new NextResponse("OK", { status: 200 })
   }
 

@@ -1,8 +1,9 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { Send, Loader2 } from "lucide-react"
+import { useRef, useState, useEffect } from "react"
+import { Send, Loader2, Smile } from "lucide-react"
 import { cn } from "@/lib/utils"
+import EmojiPicker, { type EmojiClickData, Theme } from "emoji-picker-react"
 import type { MessageRecord, ConversationMode } from "@/types/conversations"
 
 const MAX_LENGTH = 4096
@@ -16,9 +17,24 @@ interface OperatorInputProps {
 export function OperatorInput({ conversationId, mode, onMessageSent }: OperatorInputProps) {
   const [value, setValue] = useState("")
   const [sending, setSending] = useState(false)
+  const [showEmoji, setShowEmoji] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const emojiPickerRef = useRef<HTMLDivElement>(null)
   const isDisabled = mode === "bot"
   const canSend = value.trim().length > 0 && !sending && !isDisabled
+
+  // Close picker when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target as Node)) {
+        setShowEmoji(false)
+      }
+    }
+    if (showEmoji) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [showEmoji])
 
   async function send() {
     if (!canSend) return
@@ -48,6 +64,21 @@ export function OperatorInput({ conversationId, mode, onMessageSent }: OperatorI
     }
   }
 
+  function insertEmoji(emojiData: EmojiClickData) {
+    const ta = textareaRef.current
+    if (!ta) return
+    const start = ta.selectionStart ?? value.length
+    const end = ta.selectionEnd ?? value.length
+    const next = value.slice(0, start) + emojiData.emoji + value.slice(end)
+    setValue(next)
+    // Restore focus and cursor position after state update
+    requestAnimationFrame(() => {
+      ta.focus()
+      const pos = start + emojiData.emoji.length
+      ta.setSelectionRange(pos, pos)
+    })
+  }
+
   return (
     <div
       className={cn(
@@ -60,7 +91,39 @@ export function OperatorInput({ conversationId, mode, onMessageSent }: OperatorI
           Switch to human mode to send a message
         </p>
       )}
-      <div className="flex items-end gap-2">
+      <div className="relative flex items-end gap-2">
+        {/* Emoji picker popover */}
+        {showEmoji && (
+          <div
+            ref={emojiPickerRef}
+            className="absolute bottom-full left-0 mb-2 z-50"
+          >
+            <EmojiPicker
+              onEmojiClick={insertEmoji}
+              theme={Theme.DARK}
+              lazyLoadEmojis
+              skinTonesDisabled
+              searchDisabled={false}
+            />
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setShowEmoji((v) => !v)}
+          disabled={isDisabled}
+          title="Emoji"
+          className={cn(
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors",
+            showEmoji
+              ? "bg-white/10 text-white/70"
+              : "bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/70",
+            isDisabled && "cursor-not-allowed opacity-50"
+          )}
+        >
+          <Smile size={16} strokeWidth={1.5} />
+        </button>
+
         <div className="relative flex-1">
           <textarea
             ref={textareaRef}

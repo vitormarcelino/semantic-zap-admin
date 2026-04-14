@@ -11,10 +11,75 @@ datasource db {
 }
 
 model User {
-  id        String   @id           // Clerk user ID (e.g. "user_2abc...")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  agents    Agent[]
+  id           String        @id           // Clerk user ID (e.g. "user_2abc...")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  agents       Agent[]
+  subscription Subscription?
+  invoices     Invoice[]
+}
+
+model Subscription {
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  user                  User      @relation(fields: [userId], references: [id])
+
+  plan                  String    @default("trial")   // "trial" | "starter" | "pro" | "business"
+  status                String    @default("trial")
+  // Status values:
+  // "trial"            — within 30-day trial period
+  // "trial_ended"      — trial expired, not yet subscribed
+  // "active"           — paid subscription active
+  // "past_due"         — payment failed, within 5-day grace period
+  // "blocked"          — grace period expired or trial ended, features locked
+  // "cancelled"        — user cancelled, access ended
+  // "cancelled_active" — cancelled but still within paid period
+  billingCycle          String?   // "monthly" | "yearly"
+
+  trialStartedAt        DateTime  @default(now())
+  trialEndsAt           DateTime
+
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
+  cancelAtPeriodEnd     Boolean   @default(false)
+  cancelledAt           DateTime?
+
+  pastDueAt             DateTime?
+  gracePeriodEndsAt     DateTime?
+
+  asaasCustomerId       String?   @unique
+  asaasSubscriptionId   String?   @unique
+
+  messagesUsedThisMonth Int       @default(0)
+  usagePeriodStart      DateTime  @default(now())
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Invoice {
+  id                  String    @id @default(cuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id])
+
+  asaasPaymentId      String    @unique
+  asaasSubscriptionId String?
+
+  amount              Float
+  status              String    // "pending" | "paid" | "overdue" | "cancelled" | "refunded"
+  billingType         String    // "CREDIT_CARD" | "BOLETO" | "PIX"
+  dueDate             DateTime
+  paidAt              DateTime?
+  invoiceUrl          String?
+  bankSlipUrl         String?
+  pixQrCode           String?
+  pixCopiaECola       String?
+  description         String?
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([userId])
 }
 
 model Agent {

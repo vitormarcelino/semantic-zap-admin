@@ -3,6 +3,8 @@ import { getAgentConfig, setAgentConfig, type AgentConfig } from "@/lib/cache/ag
 import { sendMessage } from "@/lib/sender"
 import { splitMessage } from "@/lib/sender/split-message"
 import { publishSSEEvent } from "@/lib/realtime/publisher"
+import { assertWithinLimits, LimitExceededError } from "@/lib/billing/limits"
+import { incrementMessageUsage } from "@/lib/billing/usage"
 import type { EnqueuePayload } from "@/lib/webhook/types"
 
 const PYTHON_TIMEOUT_MS = 55_000
@@ -86,7 +88,26 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
       await setAgentConfig(config)
     }
 
-    // 5. Call Python service
+    // 5. Check message limit before calling Python
+    const agentUserId = record.conversation.agent
+      ? await prisma.agent.findUnique({ where: { id: agentId }, select: { userId: true } }).then((a) => a?.userId)
+      : undefined
+
+    if (agentUserId) {
+      try {
+        await assertWithinLimits(agentUserId, "messages")
+      } catch (err) {
+        if (err instanceof LimitExceededError) {
+          console.log(`[worker] Message limit reached for user ${agentUserId} — marking as failed`)
+          await prisma.message.update({ where: { id: messageId }, data: { status: "failed" } })
+          return
+        }
+        throw err
+      }
+      await incrementMessageUsage(agentUserId)
+    }
+
+    // 6. Call Python service
     const pythonUrl = process.env.PYTHON_SERVICE_URL ?? "http://localhost:8000"
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), PYTHON_TIMEOUT_MS)
@@ -122,7 +143,7 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
       clearTimeout(timeout)
     }
 
-    // 6. Fallback for empty reply
+    // 7. Fallback for empty reply
     if (!reply) {
       reply =
         config.fallbackPrompt?.trim() ||
@@ -130,7 +151,7 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
       console.warn(`[worker] Python returned empty reply for message ${messageId} — using fallback`)
     }
 
-    // 7. Re-check mode before sending — operator may have taken over during the Python call
+    // 8. Re-check mode before sending — operator may have taken over during the Python call
     const freshModeRows = await prisma.$queryRaw<Array<{ mode: string }>>`
       SELECT mode FROM "Conversation" WHERE id = ${conversationId}
     `

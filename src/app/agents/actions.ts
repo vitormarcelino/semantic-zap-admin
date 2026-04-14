@@ -7,6 +7,8 @@ import { uuidv7 } from "uuidv7"
 import { prisma } from "@/lib/prisma"
 import { AGENT_DEFAULTS } from "@/constants/agent"
 import { invalidateAgentConfig } from "@/lib/cache/agent-config"
+import { ensureSubscription } from "@/lib/billing/subscription"
+import { assertWithinLimits, LimitExceededError } from "@/lib/billing/limits"
 
 export type ActionState = {
   error?: string
@@ -25,6 +27,7 @@ async function ensureUser(userId: string) {
     create: { id: userId },
     update: {},
   })
+  await ensureSubscription(userId)
 }
 
 export async function getAgents() {
@@ -52,6 +55,16 @@ export async function createAgent(
   if (!name) return { fieldErrors: { name: "Nome é obrigatório" } }
 
   await ensureUser(userId)
+
+  try {
+    await assertWithinLimits(userId, "agents")
+  } catch (err) {
+    if (err instanceof LimitExceededError) {
+      return { error: `Limite de agentes atingido (${err.used}/${err.limit}) no plano ${err.plan}. Faça upgrade para criar mais agentes.` }
+    }
+    throw err
+  }
+
   await prisma.agent.create({
     data: {
       id: uuidv7(),

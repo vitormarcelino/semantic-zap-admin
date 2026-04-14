@@ -10,6 +10,7 @@ import {
   BarChart2,
   Settings,
   Zap,
+  CreditCard,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { href: "/webhooks", label: "Webhooks", icon: Link2 },
   { href: "/analytics", label: "Analytics", icon: BarChart2 },
   { href: "/settings", label: "Configurações", icon: Settings },
+  { href: "/billing", label: "Assinatura", icon: CreditCard },
 ]
 
 export function Sidebar() {

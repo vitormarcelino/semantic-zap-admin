@@ -59,6 +59,7 @@ export type SSEEventType =
   | "mode_changed"
   | "message_status"
   | "conversation_updated"
+  | "subscription_updated"
 
 export interface SSEEvent {
   type: SSEEventType
