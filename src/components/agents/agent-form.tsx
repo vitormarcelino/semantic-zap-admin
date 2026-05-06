@@ -53,12 +53,13 @@ const TONE_LABELS: Record<string, string> = {
 const PROVIDER_OPTIONS = [
   { value: "whatsapp", label: "WhatsApp" },
   { value: "twilio", label: "Twilio" },
+  { value: "telegram", label: "Telegram" },
 ]
 
-type TabId = "identidade" | "ia" | "mensagens"
+type TabId = "canal" | "ia" | "mensagens"
 
 const TABS: { id: TabId; label: string }[] = [
-  { id: "identidade", label: "Identidade" },
+  { id: "canal", label: "Canal" },
   { id: "ia", label: "Configuração de IA" },
   { id: "mensagens", label: "Mensagens" },
 ]
@@ -76,6 +77,11 @@ type AgentDefaults = {
   systemPrompt?: string | null
   greetingPrompt?: string | null
   fallbackPrompt?: string | null
+  whatsappPhoneNumberId?: string | null
+  whatsappAccessTokenSet?: boolean
+  twilioAccountSid?: string | null
+  twilioAuthTokenSet?: boolean
+  telegramBotTokenSet?: boolean
 }
 
 interface AgentFormProps {
@@ -117,7 +123,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
   )
 
   // Tab state
-  const [activeTab, setActiveTab] = useState<TabId>("identidade")
+  const [activeTab, setActiveTab] = useState<TabId>("canal")
 
   // Avançado section — auto-expand if any advanced field has non-default value
   const hasNonDefaultAdvanced =
@@ -130,7 +136,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
 
   // Tab error indicators (derived from server action response)
   const tabErrors: Record<TabId, boolean> = {
-    identidade: !!state.fieldErrors?.name,
+    canal: !!state.fieldErrors?.name,
     ia: false,
     mensagens: false,
   }
@@ -138,7 +144,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
   // Keyboard navigation for tablist
   const handleTabKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
-      const ids: TabId[] = ["identidade", "ia", "mensagens"]
+      const ids: TabId[] = ["canal", "ia", "mensagens"]
       const current = ids.indexOf(activeTab)
       if (e.key === "ArrowRight") {
         setActiveTab(ids[(current + 1) % ids.length])
@@ -201,12 +207,12 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
 
         {/* Panels — all mounted, visibility via CSS */}
         <div className="px-5 py-5">
-          {/* ── Identidade ──────────────────────────────────────────── */}
+          {/* ── Canal ───────────────────────────────────────────────── */}
           <div
             role="tabpanel"
-            id="panel-identidade"
-            aria-labelledby="tab-identidade"
-            className={activeTab === "identidade" ? "block" : "hidden"}
+            id="panel-canal"
+            aria-labelledby="tab-canal"
+            className={activeTab === "canal" ? "block" : "hidden"}
           >
             <div className="grid gap-4">
               <div className="flex flex-col gap-1.5">
@@ -237,11 +243,13 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="phoneNumber">Número de Telefone</Label>
+                  <Label htmlFor="phoneNumber">
+                    {provider === "telegram" ? "Username do Bot" : "Número de Telefone"}
+                  </Label>
                   <Input
                     id="phoneNumber"
                     name="phoneNumber"
-                    placeholder="+55 11 99999-9999"
+                    placeholder={provider === "telegram" ? "meubot (sem @)" : "+55 11 99999-9999"}
                     defaultValue={defaultValues?.phoneNumber ?? ""}
                   />
                 </div>
@@ -262,6 +270,80 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
                   <input type="hidden" name="provider" value={provider} />
                 </div>
               </div>
+
+              {provider && (
+                <div className="grid gap-4 rounded-lg border border-white/8 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wider text-white/38">Credenciais</p>
+
+                  {provider === "whatsapp" && (
+                    <>
+                      <div className="flex flex-col gap-1.5">
+                        <Label htmlFor="whatsappPhoneNumberId">Phone Number ID</Label>
+                        <p className="text-xs text-white/38">ID numérico do número no Meta Business.</p>
+                        <Input
+                          id="whatsappPhoneNumberId"
+                          name="whatsappPhoneNumberId"
+                          placeholder="123456789012345"
+                          defaultValue={defaultValues?.whatsappPhoneNumberId ?? ""}
+                          autoComplete="off"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <Label htmlFor="whatsappAccessToken">Access Token</Label>
+                        <p className="text-xs text-white/38">Token de acesso permanente da Meta.</p>
+                        <Input
+                          id="whatsappAccessToken"
+                          name="whatsappAccessToken"
+                          type="password"
+                          placeholder={defaultValues?.whatsappAccessTokenSet ? "Configurado — deixe em branco para manter" : "EAAxxxxx..."}
+                          autoComplete="off"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {provider === "twilio" && (
+                    <>
+                      <div className="flex flex-col gap-1.5">
+                        <Label htmlFor="twilioAccountSid">Account SID</Label>
+                        <p className="text-xs text-white/38">SID da conta Twilio.</p>
+                        <Input
+                          id="twilioAccountSid"
+                          name="twilioAccountSid"
+                          placeholder="ACxxxxx..."
+                          defaultValue={defaultValues?.twilioAccountSid ?? ""}
+                          autoComplete="off"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <Label htmlFor="twilioAuthToken">Auth Token</Label>
+                        <p className="text-xs text-white/38">Token de autenticação da conta Twilio.</p>
+                        <Input
+                          id="twilioAuthToken"
+                          name="twilioAuthToken"
+                          type="password"
+                          placeholder={defaultValues?.twilioAuthTokenSet ? "Configurado — deixe em branco para manter" : "••••••••••••••••••••••••••••••••"}
+                          autoComplete="off"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {provider === "telegram" && (
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="telegramBotToken">Bot Token</Label>
+                      <p className="text-xs text-white/38">Token do bot gerado pelo @BotFather.</p>
+                      <Input
+                        id="telegramBotToken"
+                        name="telegramBotToken"
+                        type="password"
+                        placeholder={defaultValues?.telegramBotTokenSet ? "Configurado — deixe em branco para manter" : "123456789:AAFxxxxx..."}
+                        autoComplete="off"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -446,6 +528,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
               </div>
             </div>
           </div>
+
         </div>
       </div>
 

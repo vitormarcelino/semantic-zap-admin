@@ -32,6 +32,11 @@ export async function GET(
       fallbackPrompt: true,
       provider: true,
       phoneNumber: true,
+      whatsappPhoneNumberId: true,
+      whatsappAccessToken: true,
+      twilioAccountSid: true,
+      twilioAuthToken: true,
+      telegramBotToken: true,
     },
   })
 

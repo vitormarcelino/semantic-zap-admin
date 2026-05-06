@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server"
 
 export type AsaasWebhookEvent =
+  | "PAYMENT_CREATED"
   | "PAYMENT_RECEIVED"
   | "PAYMENT_CONFIRMED"
   | "PAYMENT_OVERDUE"
@@ -11,22 +12,36 @@ export type AsaasWebhookEvent =
   | "SUBSCRIPTION_DELETED"
 
 export interface AsaasWebhookPayload {
+  id?: string
+  dateCreated?: string
+  account?: { id: string; ownerId: string | null }
   event: AsaasWebhookEvent
   payment?: {
+    object?: string
     id: string
     subscription?: string
     customer: string
     billingType: string
     value: number
+    netValue?: number
     status: string
     dueDate: string
-    paymentDate?: string
+    originalDueDate?: string
+    paymentDate?: string | null
+    clientPaymentDate?: string
+    confirmedDate?: string
     invoiceUrl?: string
+    invoiceNumber?: string
     bankSlipUrl?: string
     pixQrCode?: string
     pixCopiaECola?: string
     description?: string
     externalReference?: string
+    creditCard?: {
+      creditCardNumber: string
+      creditCardBrand: string
+      creditCardToken: string
+    }
   }
   subscription?: {
     id: string

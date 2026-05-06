@@ -32,10 +32,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   try {
     switch (event.event) {
+      case "PAYMENT_CREATED":
       case "PAYMENT_RECEIVED":
       case "PAYMENT_CONFIRMED": {
         const payment = event.payment
         if (!payment) break
+
+        if (event.event === "PAYMENT_CREATED" && payment.status !== "CONFIRMED" && payment.status !== "RECEIVED") {
+          console.log(`[webhook/asaas] PAYMENT_CREATED com status ${payment.status} — ignorando`)
+          break
+        }
 
         // Find subscription by asaasSubscriptionId or externalReference (userId)
         const sub = payment.subscription
@@ -79,13 +85,25 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             status: "paid",
             billingType: payment.billingType,
             dueDate: new Date(payment.dueDate),
-            paidAt: payment.paymentDate ? new Date(payment.paymentDate) : now,
+            paidAt: payment.paymentDate
+              ? new Date(payment.paymentDate)
+              : payment.clientPaymentDate
+              ? new Date(payment.clientPaymentDate)
+              : payment.confirmedDate
+              ? new Date(payment.confirmedDate)
+              : now,
             invoiceUrl: payment.invoiceUrl,
             description: payment.description,
           },
           update: {
             status: "paid",
-            paidAt: payment.paymentDate ? new Date(payment.paymentDate) : now,
+            paidAt: payment.paymentDate
+              ? new Date(payment.paymentDate)
+              : payment.clientPaymentDate
+              ? new Date(payment.clientPaymentDate)
+              : payment.confirmedDate
+              ? new Date(payment.confirmedDate)
+              : now,
           },
         })
 

@@ -21,7 +21,8 @@ function getBaseUrl(): string {
 function getApiKey(): string {
   const key = process.env.ASAAS_API_KEY
   if (!key) throw new Error("ASAAS_API_KEY environment variable is not set")
-  return key
+  // dotenv-expand interpreta $ como variável — armazenamos sem $ e adicionamos aqui
+  return key.startsWith("$") ? key : `$${key}`
 }
 
 export async function asaasFetch<T = unknown>(

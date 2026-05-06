@@ -1,4 +1,4 @@
-export type Provider = "whatsapp" | "twilio"
+export type Provider = "whatsapp" | "twilio" | "telegram"
 
 export type NormalizedMessage = {
   provider: Provider

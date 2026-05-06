@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
-import { getSubscription } from "@/lib/billing/subscription"
+import { ensureSubscription } from "@/lib/billing/subscription"
 import { getPlanLimits } from "@/lib/billing/plans"
 import { prisma } from "@/lib/prisma"
 
@@ -8,8 +8,8 @@ export async function GET(): Promise<NextResponse> {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const sub = await getSubscription(userId)
-  if (!sub) return NextResponse.json({ error: "Subscription not found" }, { status: 404 })
+  await prisma.user.upsert({ where: { id: userId }, create: { id: userId }, update: {} })
+  const sub = await ensureSubscription(userId)
 
   const limits = getPlanLimits(sub.plan)
 

@@ -1,11 +1,4 @@
-export async function sendWhatsApp(to: string, parts: string[]): Promise<void> {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID
-  const token = process.env.WHATSAPP_ACCESS_TOKEN
-
-  if (!phoneNumberId || !token) {
-    throw new Error("Missing WHATSAPP_PHONE_NUMBER_ID or WHATSAPP_ACCESS_TOKEN")
-  }
-
+export async function sendWhatsApp(to: string, parts: string[], phoneNumberId: string, token: string): Promise<void> {
   const url = `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`
 
   for (const text of parts) {

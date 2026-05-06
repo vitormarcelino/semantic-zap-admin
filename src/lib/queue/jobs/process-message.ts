@@ -32,6 +32,11 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
               fallbackPrompt: true,
               provider: true,
               phoneNumber: true,
+              whatsappPhoneNumberId: true,
+              whatsappAccessToken: true,
+              twilioAccountSid: true,
+              twilioAuthToken: true,
+              telegramBotToken: true,
             },
           },
         },
@@ -170,6 +175,13 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
       to: record.conversation.phoneNumber,
       from: record.conversation.agent.phoneNumber ?? "",
       parts,
+      credentials: {
+        whatsappPhoneNumberId: record.conversation.agent.whatsappPhoneNumberId,
+        whatsappAccessToken: record.conversation.agent.whatsappAccessToken,
+        twilioAccountSid: record.conversation.agent.twilioAccountSid,
+        twilioAuthToken: record.conversation.agent.twilioAuthToken,
+        telegramBotToken: record.conversation.agent.telegramBotToken,
+      },
     })
 
     // 10. Persist assistant message + update statuses

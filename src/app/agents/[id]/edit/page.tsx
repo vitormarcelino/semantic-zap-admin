@@ -33,6 +33,11 @@ export default async function EditAgentPage({ params }: EditAgentPageProps) {
             systemPrompt: agent.systemPrompt,
             greetingPrompt: agent.greetingPrompt,
             fallbackPrompt: agent.fallbackPrompt,
+            whatsappPhoneNumberId: agent.whatsappPhoneNumberId,
+            whatsappAccessTokenSet: !!agent.whatsappAccessToken,
+            twilioAccountSid: agent.twilioAccountSid,
+            twilioAuthTokenSet: !!agent.twilioAuthToken,
+            telegramBotTokenSet: !!agent.telegramBotToken,
           }}
         />
       </div>

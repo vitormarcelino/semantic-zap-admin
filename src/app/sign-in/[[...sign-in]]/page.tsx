@@ -29,26 +29,29 @@ export default function SignInPage() {
     e.preventDefault()
     setError(null)
 
-    // Step 1: set identifier
-    const { error: createError } = await signIn.create({ identifier: email })
-    if (createError) {
-      setError(createError.message)
-      return
-    }
+    try {
+      // Complete sign-in in one step with identifier + password
+      const { error: createError } = await signIn.create({ identifier: email, password })
+      if (createError) {
+        setError(createError.message)
+        return
+      }
 
-    // Step 2: submit password
-    const { error: passwordError } = await signIn.password({ password })
-    if (passwordError) {
-      setError(passwordError.message)
-      return
-    }
+      // Only finalize when sign-in is complete
+      if (signIn.status !== "complete") {
+        console.log("Sign-in status:", signIn.status)
+        setError("Autenticação incompleta. Verifique suas credenciais.")
+        return
+      }
 
-    // Step 3: finalize — sets active session and navigates
-    const { error: finalizeError } = await signIn.finalize({
-      navigate: () => router.push("/dashboard"),
-    })
-    if (finalizeError) {
-      setError(finalizeError.message)
+      const { error: finalizeError } = await signIn.finalize({
+        navigate: () => router.push("/dashboard"),
+      })
+      if (finalizeError) {
+        setError(finalizeError.message)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao fazer login. Tente novamente.")
     }
   }
 

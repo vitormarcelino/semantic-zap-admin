@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth, clerkClient } from "@clerk/nextjs/server"
-import { getSubscription, updateSubscription, invalidateSubscriptionCache } from "@/lib/billing/subscription"
+import { getSubscription, ensureSubscription, updateSubscription, invalidateSubscriptionCache } from "@/lib/billing/subscription"
 import { getPlanById, getPlanLimits } from "@/lib/billing/plans"
 import { getTrialDaysRemaining } from "@/lib/billing/trial"
 import { createCustomer } from "@/lib/asaas/customers"
@@ -15,8 +15,9 @@ export async function GET(): Promise<NextResponse> {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const sub = await getSubscription(userId)
-  if (!sub) return NextResponse.json({ error: "Subscription not found" }, { status: 404 })
+  // Also ensure the user row exists (in case they navigate to /billing before creating an agent)
+  await prisma.user.upsert({ where: { id: userId }, create: { id: userId }, update: {} })
+  const sub = await ensureSubscription(userId)
 
   const limits = getPlanLimits(sub.plan)
   const trialDaysRemaining = sub.status === "trial" ? getTrialDaysRemaining(sub) : 0
@@ -90,9 +91,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const price = billingCycle === "yearly" ? plan.priceYearly : plan.priceMonthly
   if (!price) return NextResponse.json({ error: "Plan has no price" }, { status: 400 })
 
-  // Get or create Asaas customer
-  const sub = await getSubscription(userId)
-  if (!sub) return NextResponse.json({ error: "Subscription not found" }, { status: 404 })
+  // Get or create subscription row (user may not have created an agent yet)
+  await prisma.user.upsert({ where: { id: userId }, create: { id: userId }, update: {} })
+  const sub = await ensureSubscription(userId)
 
   let asaasCustomerId = sub.asaasCustomerId
 

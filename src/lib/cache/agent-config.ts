@@ -13,6 +13,11 @@ export type AgentConfig = {
   fallbackPrompt: string | null
   provider: string | null
   phoneNumber: string | null
+  whatsappPhoneNumberId: string | null
+  whatsappAccessToken: string | null
+  twilioAccountSid: string | null
+  twilioAuthToken: string | null
+  telegramBotToken: string | null
 }
 
 const PREFIX = "agent:config:"

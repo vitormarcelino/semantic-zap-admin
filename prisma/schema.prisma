@@ -95,6 +95,11 @@ model Agent {
   maxTokens      Int      @default(300)
   phoneNumber    String?
   provider       String?
+  whatsappPhoneNumberId String?
+  whatsappAccessToken   String?
+  twilioAccountSid      String?
+  twilioAuthToken       String?
+  telegramBotToken      String?
   systemPrompt   String?
   greetingPrompt String?
   fallbackPrompt String?

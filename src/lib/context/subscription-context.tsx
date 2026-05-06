@@ -83,7 +83,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     return () => source.close()
   }, [fetch_])
 
-  const status = subscription?.status ?? "trial"
+  const status = subscription?.status ?? null
   const isTrialing = status === "trial"
   const isBlocked = status === "blocked" || status === "trial_ended"
   const isPastDue = status === "past_due"
