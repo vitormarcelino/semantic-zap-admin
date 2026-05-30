@@ -23,6 +23,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return new NextResponse("", { status: 200 })
   }
 
+  console.log(update)
+
   // 3. Normalize payload (returns null for non-text updates)
   const msg = parseTelegramPayload(update)
   if (!msg) return new NextResponse("", { status: 200 })

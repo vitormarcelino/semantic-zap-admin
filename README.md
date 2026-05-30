@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# semanticzap-admin
 
-## Getting Started
-
-First, run the development server:
+## Desenvolvimento
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Para ambiente completo com Postgres via Docker:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev:docker
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## CI/CD
 
-## Learn More
+O repositório usa GitHub Actions em `.github/workflows/ci-cd.yml`.
 
-To learn more about Next.js, take a look at the following resources:
+- `pull_request` e `push`: executam `npm ci`, `npx prisma generate`, `npm run lint` e `npm run build`
+- `push` na `main`: também gera e publica a imagem Docker no Artifact Registry
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Imagem publicada:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```text
+us-east1-docker.pkg.dev/semanticzap/semanticzap-admin/semanticzap-admin
+```
 
-## Deploy on Vercel
+Autenticação com GCP:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Workload Identity Provider: `projects/513791847416/locations/global/workloadIdentityPools/github-actions/providers/github-admin-oidc`
+- Service account: `gha-semanticzap-admin@semanticzap.iam.gserviceaccount.com`

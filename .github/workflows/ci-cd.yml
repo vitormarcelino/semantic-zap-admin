@@ -1,0 +1,82 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+
+env:
+  NODE_VERSION: "22"
+  GCP_PROJECT_ID: semanticzap
+  GCP_REGION: us-east1
+  GAR_REPOSITORY: semanticzap-admin
+  IMAGE_NAME: semanticzap-admin
+  WORKLOAD_IDENTITY_PROVIDER: projects/513791847416/locations/global/workloadIdentityPools/github-actions/providers/github-admin-oidc
+  GCP_SERVICE_ACCOUNT: gha-semanticzap-admin@semanticzap.iam.gserviceaccount.com
+  DATABASE_URL: postgresql://semanticzap:semanticzap@localhost:5432/semanticzap
+  REDIS_URL: redis://localhost:6379
+  INTERNAL_API_SECRET: ci-test-secret
+  INTERNAL_API_BASE_URL: http://localhost:3000
+  PYTHON_SERVICE_URL: http://localhost:8000
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  quality:
+    name: Lint and build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run production build
+        run: npm run build
+
+  publish-image:
+    name: Build and publish image
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs:
+      - quality
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push image
+        env:
+          IMAGE_SHA: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          IMAGE_LATEST: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+        run: |
+          docker build -t "$IMAGE_SHA" -t "$IMAGE_LATEST" .
+          docker push "$IMAGE_SHA"
+          docker push "$IMAGE_LATEST"

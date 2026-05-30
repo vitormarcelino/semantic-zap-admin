@@ -34,6 +34,11 @@ export async function sendOperatorMessage(
         select: {
           provider: true,
           phoneNumber: true,
+          whatsappPhoneNumberId: true,
+          whatsappAccessToken: true,
+          twilioAccountSid: true,
+          twilioAuthToken: true,
+          telegramBotToken: true,
         },
       },
     },
@@ -63,6 +68,13 @@ export async function sendOperatorMessage(
       to: conversation.phoneNumber,
       from: conversation.agent.phoneNumber ?? "",
       parts,
+      credentials: {
+        whatsappPhoneNumberId: conversation.agent.whatsappPhoneNumberId,
+        whatsappAccessToken: conversation.agent.whatsappAccessToken,
+        twilioAccountSid: conversation.agent.twilioAccountSid,
+        twilioAuthToken: conversation.agent.twilioAuthToken,
+        telegramBotToken: conversation.agent.telegramBotToken,
+      },
     })
   } catch (err) {
     console.error(`[send-operator-message] Send failed for conversation ${conversationId}:`, err)
