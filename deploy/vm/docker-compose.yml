@@ -1,0 +1,59 @@
+services:
+  app:
+    image: ${IMAGE_REF}
+    restart: unless-stopped
+    env_file:
+      - /opt/semanticzap/config/semanticzap-admin.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://semanticzap:semanticzap@semanticzap-postgres:5432/semanticzap
+      REDIS_URL: redis://semanticzap-redis:6379/0
+      INTERNAL_API_BASE_URL: http://app:3000
+      PYTHON_SERVICE_URL: http://host.docker.internal:8000
+      NEXT_TELEMETRY_DISABLED: "1"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then((response)=>{if(!response.ok) process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 20s
+    ports:
+      - "127.0.0.1:${HOST_PORT}:3000"
+    networks:
+      - default
+      - backend
+
+  worker:
+    image: ${IMAGE_REF}
+    restart: unless-stopped
+    command: ["npm", "run", "worker"]
+    depends_on:
+      app:
+        condition: service_started
+    env_file:
+      - /opt/semanticzap/config/semanticzap-admin.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://semanticzap:semanticzap@semanticzap-postgres:5432/semanticzap
+      REDIS_URL: redis://semanticzap-redis:6379/0
+      INTERNAL_API_BASE_URL: http://app:3000
+      PYTHON_SERVICE_URL: http://host.docker.internal:8000
+      NEXT_TELEMETRY_DISABLED: "1"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      - default
+      - backend
+
+networks:
+  backend:
+    external: true
+    name: semanticzap-core
