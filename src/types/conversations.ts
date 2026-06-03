@@ -7,6 +7,7 @@ export interface MessageRecord {
   conversationId: string
   role: "user" | "assistant"
   content: string
+  mediaType: "voice" | null
   status: MessageStatus
   wamid: string | null
   sentBy: string | null // "bot" | "operator:{userId}" | null

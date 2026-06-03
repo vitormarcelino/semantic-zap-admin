@@ -5,6 +5,8 @@ import { splitMessage } from "@/lib/sender/split-message"
 import { publishSSEEvent } from "@/lib/realtime/publisher"
 import { assertWithinLimits, LimitExceededError } from "@/lib/billing/limits"
 import { incrementMessageUsage } from "@/lib/billing/usage"
+import { downloadTelegramVoice, TelegramDownloadError } from "@/lib/transcription/telegram-audio"
+import { transcribeAudio, TranscriptionEmptyError, TranscriptionError } from "@/lib/transcription/whisper"
 import type { EnqueuePayload } from "@/lib/webhook/types"
 
 const PYTHON_TIMEOUT_MS = 55_000
@@ -72,7 +74,7 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
   })
 
   try {
-    // 4. Fetch agent config (cache → internal API fallback)
+    // 4a. Fetch agent config (cache → internal API fallback)
     let config = await getAgentConfig(agentId)
     if (!config) {
       const baseUrl = process.env.INTERNAL_API_BASE_URL ?? "http://localhost:3000"
@@ -91,6 +93,91 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
       }
       config = (await res.json()) as AgentConfig
       await setAgentConfig(config)
+    }
+
+    // 4b. Voice transcription — resolve file_id → text before any further processing
+    const mediaType = record.mediaType
+    const agent = record.conversation.agent
+    const fallback = config.fallbackPrompt?.trim() || "Desculpe, ocorreu um erro. Tente novamente."
+
+    if (mediaType === "voice") {
+      if (!agent.telegramBotToken) {
+        console.error(`[worker] voice message ${messageId} but agent has no telegramBotToken — using fallback`)
+        await sendMessage({
+          provider: agent.provider,
+          to: record.conversation.phoneNumber,
+          from: agent.phoneNumber ?? "",
+          parts: splitMessage(fallback),
+          credentials: {
+            whatsappPhoneNumberId: agent.whatsappPhoneNumberId,
+            whatsappAccessToken: agent.whatsappAccessToken,
+            twilioAccountSid: agent.twilioAccountSid,
+            twilioAuthToken: agent.twilioAuthToken,
+            telegramBotToken: agent.telegramBotToken,
+          },
+        })
+        await prisma.message.update({ where: { id: messageId }, data: { status: "failed" } })
+        return
+      }
+
+      let transcription: string
+      try {
+        const audioBuffer = await downloadTelegramVoice(record.content, agent.telegramBotToken)
+        transcription = await transcribeAudio(audioBuffer, agent.language)
+      } catch (err) {
+        if (err instanceof TranscriptionEmptyError) {
+          // US2: audio was silent or unintelligible
+          const emptyReply =
+            "Não consegui entender o áudio. Poderia digitar sua mensagem ou tentar novamente?"
+          console.warn(`[worker] voice message ${messageId} returned empty transcription`)
+          await sendMessage({
+            provider: agent.provider,
+            to: record.conversation.phoneNumber,
+            from: agent.phoneNumber ?? "",
+            parts: splitMessage(emptyReply),
+            credentials: {
+              whatsappPhoneNumberId: agent.whatsappPhoneNumberId,
+              whatsappAccessToken: agent.whatsappAccessToken,
+              twilioAccountSid: agent.twilioAccountSid,
+              twilioAuthToken: agent.twilioAuthToken,
+              telegramBotToken: agent.telegramBotToken,
+            },
+          })
+          await prisma.message.update({ where: { id: messageId }, data: { status: "sent" } })
+          return
+        }
+
+        if (err instanceof TelegramDownloadError || err instanceof TranscriptionError) {
+          // US2: download or Whisper call failed
+          console.error(`[worker] voice transcription failed for ${messageId}:`, err)
+          await sendMessage({
+            provider: agent.provider,
+            to: record.conversation.phoneNumber,
+            from: agent.phoneNumber ?? "",
+            parts: splitMessage(fallback),
+            credentials: {
+              whatsappPhoneNumberId: agent.whatsappPhoneNumberId,
+              whatsappAccessToken: agent.whatsappAccessToken,
+              twilioAccountSid: agent.twilioAccountSid,
+              twilioAuthToken: agent.twilioAuthToken,
+              telegramBotToken: agent.telegramBotToken,
+            },
+          })
+          await prisma.message.update({ where: { id: messageId }, data: { status: "failed" } })
+          return
+        }
+
+        throw err
+      }
+
+      // Overwrite file_id with the transcription so history and dashboard show readable text
+      await prisma.$executeRaw`
+        UPDATE "Message" SET content = ${transcription} WHERE id = ${messageId}
+      `
+
+      // Continue with transcribed text as the user message for the Python call
+      // (record.content is stale; use transcription variable from this point on)
+      record.content = transcription
     }
 
     // 5. Check message limit before calling Python
@@ -150,9 +237,7 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
 
     // 7. Fallback for empty reply
     if (!reply) {
-      reply =
-        config.fallbackPrompt?.trim() ||
-        "Sorry, I couldn't process your request at this time."
+      reply = fallback
       console.warn(`[worker] Python returned empty reply for message ${messageId} — using fallback`)
     }
 
@@ -166,10 +251,10 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
       return
     }
 
-    // 8. Split into chunks
+    // 9. Split into chunks
     const parts = splitMessage(reply)
 
-    // 9. Send via the appropriate provider
+    // 10. Send via the appropriate provider
     await sendMessage({
       provider: record.conversation.agent.provider,
       to: record.conversation.phoneNumber,
@@ -184,7 +269,7 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
       },
     })
 
-    // 10. Persist assistant message + update statuses
+    // 11. Persist assistant message + update statuses
     const [assistantMessage] = await prisma.$transaction([
       prisma.message.create({
         data: {
@@ -205,7 +290,7 @@ export async function processMessageJob(data: EnqueuePayload): Promise<void> {
       }),
     ])
 
-    // 11. Emit SSE event so the dashboard updates in real time
+    // 12. Emit SSE event so the dashboard updates in real time
     await publishSSEEvent({
       type: "new_message",
       conversationId,

@@ -5,8 +5,9 @@ export type NormalizedMessage = {
   messageId: string  // wamid (WhatsApp) or SmsSid (Twilio)
   from: string       // sender digits only, e.g. "5511999999999"
   to: string         // receiving number digits only
-  body: string       // message text content
+  body: string       // message text content; file_id for voice messages
   timestamp: Date
+  mediaType?: "voice"
 }
 
 export type EnqueuePayload = {

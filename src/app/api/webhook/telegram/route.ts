@@ -5,6 +5,8 @@ import { parseTelegramPayload } from "@/lib/webhook/parse-telegram"
 import { enqueueMessage } from "@/lib/queue/producer"
 import { publishSSEEvent } from "@/lib/realtime/publisher"
 import { isWithinLimit } from "@/lib/billing/limits"
+import { downloadTelegramVoice } from "@/lib/transcription/telegram-audio"
+import { transcribeAudio, TranscriptionEmptyError } from "@/lib/transcription/whisper"
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   // 1. Validate secret token — always return 200 on failure (prevents Telegram retries)
@@ -25,7 +27,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   console.log(update)
 
-  // 3. Normalize payload (returns null for non-text updates)
+  // 3. Normalize payload (returns null for unsupported update types)
   const msg = parseTelegramPayload(update)
   if (!msg) return new NextResponse("", { status: 200 })
 
@@ -69,6 +71,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           conversationId: conversation.id,
           role: "user",
           content: msg.body,
+          mediaType: msg.mediaType ?? null,
           status: "pending",
           wamid: msg.messageId,
         },
@@ -98,6 +101,28 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       where: { id: conversationId },
       data: { unreadCount: { increment: 1 } },
     })
+
+    // For voice messages in human mode, transcribe inline so the dashboard
+    // receives readable text rather than a raw file_id.
+    let displayContent = msg.body
+    if (msg.mediaType === "voice" && agent.telegramBotToken) {
+      try {
+        const audioBuffer = await downloadTelegramVoice(msg.body, agent.telegramBotToken)
+        const transcription = await transcribeAudio(audioBuffer, agent.language)
+        displayContent = transcription
+        await prisma.$executeRaw`
+          UPDATE "Message" SET content = ${transcription} WHERE id = ${messageId}
+        `
+      } catch (err) {
+        if (err instanceof TranscriptionEmptyError) {
+          displayContent = "[áudio — não foi possível transcrever]"
+        } else {
+          console.error("[webhook/telegram] Human-mode voice transcription failed", err)
+          displayContent = "[mensagem de áudio]"
+        }
+      }
+    }
+
     await publishSSEEvent({
       type: "new_message",
       conversationId,
@@ -105,7 +130,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         message: {
           id: messageId,
           role: "user",
-          content: msg.body,
+          content: displayContent,
+          mediaType: msg.mediaType ?? null,
           status: "pending",
           sentBy: null,
           deliveredAt: null,

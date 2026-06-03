@@ -131,6 +131,7 @@ model Message {
   role           String       // "user" | "assistant"
   content        String
   status         String       @default("pending") // pending | processing | sent | failed
+  mediaType      String?                           // null (text) | "voice"
   wamid          String?      @unique              // WhatsApp message ID or Twilio SmsSid — used for deduplication
   sentBy         String?                           // "bot" | "operator:{userId}" | null for user messages
   deliveredAt    DateTime?                         // set when Meta delivery webhook fires (WhatsApp only)

@@ -1,4 +1,5 @@
 import { Fragment } from "react"
+import { Mic } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { StatusIndicator } from "./status-indicator"
 import type { MessageRecord } from "@/types/conversations"
@@ -117,6 +118,9 @@ export function MessageBubble({ message, provider }: MessageBubbleProps) {
         <span className="font-mono text-[10px] text-white/30">
           {relativeTime(message.createdAt)}
         </span>
+        {message.mediaType === "voice" && (
+          <Mic size={12} strokeWidth={1.5} strokeLinecap="round" className="text-white/40" />
+        )}
         {isOutbound && <SenderBadge sentBy={message.sentBy} />}
         {isOutbound && (
           <StatusIndicator status={message.status} provider={provider} />
