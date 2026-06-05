@@ -26,11 +26,11 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 const STATUS_COLOR: Record<string, string> = {
-  pending: "bg-yellow-500/15 text-yellow-400",
-  paid: "bg-[#00D060]/15 text-[#00D060]",
-  overdue: "bg-red-500/15 text-red-400",
-  cancelled: "bg-white/8 text-white/40",
-  refunded: "bg-white/8 text-white/40",
+  pending: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400",
+  paid: "bg-accent text-accent-foreground",
+  overdue: "bg-destructive/15 text-destructive",
+  cancelled: "bg-muted text-muted-foreground",
+  refunded: "bg-muted text-muted-foreground",
 }
 
 const BILLING_TYPE_LABEL: Record<string, string> = {
@@ -67,7 +67,7 @@ export function InvoiceList() {
     return (
       <div className="flex flex-col gap-2">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-12 rounded-lg bg-white/5 animate-pulse" />
+          <div key={i} className="h-12 animate-pulse rounded-lg bg-muted" />
         ))}
       </div>
     )
@@ -75,7 +75,7 @@ export function InvoiceList() {
 
   if (invoices.length === 0) {
     return (
-      <p className="py-6 text-center text-sm text-white/30">
+      <p className="py-6 text-center text-sm text-muted-foreground/50">
         Nenhuma fatura encontrada.
       </p>
     )
@@ -83,48 +83,48 @@ export function InvoiceList() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="overflow-hidden rounded-xl border border-white/8">
+      <div className="overflow-hidden rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/8 bg-white/3">
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-white/38">
+            <tr className="border-b border-border bg-muted/50">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Data
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-white/38">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Descrição
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-white/38">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Método
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-white/38">
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Valor
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-white/38">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Status
               </th>
-              <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-white/38">
+              <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Ações
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody className="divide-y divide-border">
             {invoices.map((inv) => (
-              <tr key={inv.id} className="hover:bg-white/2 transition-colors">
-                <td className="px-4 py-3 font-mono text-xs text-white/50">
+              <tr key={inv.id} className="transition-colors hover:bg-muted/30">
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                   {new Date(inv.createdAt).toLocaleDateString("pt-BR")}
                 </td>
-                <td className="px-4 py-3 text-white/70">{inv.description ?? "—"}</td>
-                <td className="px-4 py-3 text-white/50">
+                <td className="px-4 py-3 text-foreground/70">{inv.description ?? "—"}</td>
+                <td className="px-4 py-3 text-muted-foreground">
                   {BILLING_TYPE_LABEL[inv.billingType] ?? inv.billingType}
                 </td>
-                <td className="px-4 py-3 text-right font-mono text-white">
+                <td className="px-4 py-3 text-right font-mono text-foreground">
                   R$ {inv.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                 </td>
                 <td className="px-4 py-3">
                   <span
                     className={cn(
                       "rounded-full px-2 py-0.5 text-[11px] font-semibold",
-                      STATUS_COLOR[inv.status] ?? "bg-white/8 text-white/40"
+                      STATUS_COLOR[inv.status] ?? "bg-muted text-muted-foreground"
                     )}
                   >
                     {STATUS_LABEL[inv.status] ?? inv.status}
@@ -136,7 +136,7 @@ export function InvoiceList() {
                       href={inv.invoiceUrl ?? inv.bankSlipUrl ?? "#"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-white/40 hover:text-white/70 transition-colors"
+                      className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
                     >
                       Ver
                       <ExternalLink size={11} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
@@ -154,17 +154,17 @@ export function InvoiceList() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="rounded-md border border-white/8 px-3 py-1.5 text-xs text-white/50 hover:text-white/80 disabled:opacity-30 transition-colors"
+            className="rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30"
           >
             Anterior
           </button>
-          <span className="text-xs text-white/38">
+          <span className="text-xs text-muted-foreground">
             {page} / {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="rounded-md border border-white/8 px-3 py-1.5 text-xs text-white/50 hover:text-white/80 disabled:opacity-30 transition-colors"
+            className="rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30"
           >
             Próxima
           </button>

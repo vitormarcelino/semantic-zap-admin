@@ -30,7 +30,7 @@ export function TrialBanner() {
       </span>
       <Link
         href="/billing"
-        className="shrink-0 rounded-md bg-white/10 px-3 py-1 text-xs font-semibold hover:bg-white/20 transition-colors"
+        className="shrink-0 rounded-md bg-foreground/10 px-3 py-1 text-xs font-semibold hover:bg-foreground/20 transition-colors"
       >
         Escolher um plano
       </Link>

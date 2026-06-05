@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useState } from "react"
+import { ThemeProvider } from "next-themes"
 import { SubscriptionProvider } from "@/lib/context/subscription-context"
 import { TrialBanner } from "@/components/billing/trial-banner"
 import { GracePeriodBanner } from "@/components/billing/grace-period-banner"
@@ -21,13 +22,20 @@ export function Providers({ children }: { children: React.ReactNode }) {
   )
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SubscriptionProvider>
-        <TrialBanner />
-        <GracePeriodBanner />
-        <BlockedOverlay />
-        {children}
-      </SubscriptionProvider>
-    </QueryClientProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="light"
+      storageKey="semanticzap-theme"
+      disableTransitionOnChange
+    >
+      <QueryClientProvider client={queryClient}>
+        <SubscriptionProvider>
+          <TrialBanner />
+          <GracePeriodBanner />
+          <BlockedOverlay />
+          {children}
+        </SubscriptionProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   )
 }

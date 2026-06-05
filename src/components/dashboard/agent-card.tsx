@@ -19,23 +19,23 @@ function formatResponseTime(seconds: number | null): string {
 
 export function AgentDashboardCard({ agent }: AgentCardProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-white/8 bg-[#1F2535] px-5 py-4">
+    <div className="flex flex-col gap-4 rounded-xl border border-border bg-card px-5 py-4">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex min-w-0 items-center gap-2">
           <span
             className={cn(
               "mt-0.5 h-2 w-2 shrink-0 rounded-full",
-              agent.isActive ? "bg-[#00D060]" : "bg-white/20"
+              agent.isActive ? "bg-primary" : "bg-muted-foreground/20"
             )}
           />
-          <span className="truncate text-sm font-medium text-white">
+          <span className="truncate text-sm font-medium text-foreground">
             {agent.name}
           </span>
         </div>
         <Link
           href={`/conversations?agentId=${agent.id}`}
-          className="flex shrink-0 items-center gap-1 rounded-md border border-white/8 px-2.5 py-1 text-xs text-white/60 transition-colors hover:text-white"
+          className="flex shrink-0 items-center gap-1 rounded-md border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
           Ver
           <ArrowRight size={12} strokeWidth={1.5} />
@@ -43,34 +43,34 @@ export function AgentDashboardCard({ agent }: AgentCardProps) {
       </div>
 
       {/* Model / tone */}
-      <div className="flex items-center gap-2 text-xs text-white/38">
-        <span className="rounded bg-white/5 px-1.5 py-0.5 font-mono">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="rounded bg-muted px-1.5 py-0.5 font-mono">
           {agent.model}
         </span>
         <span>{agent.tone}</span>
       </div>
 
       {/* Metrics row */}
-      <div className="grid grid-cols-3 gap-2 border-t border-white/8 pt-3">
+      <div className="grid grid-cols-3 gap-2 border-t border-border pt-3">
         {[
           { label: "Conversas", value: agent.metrics.conversations },
           { label: "Mensagens", value: agent.metrics.messages },
           { label: "Transferências", value: agent.metrics.takeovers },
         ].map((m) => (
           <div key={m.label} className="flex flex-col gap-0.5">
-            <span className="font-mono text-base font-medium text-white">
+            <span className="font-mono text-base font-medium text-foreground">
               {new Intl.NumberFormat("pt-BR").format(m.value)}
             </span>
-            <span className="text-xs text-white/38">{m.label}</span>
+            <span className="text-xs text-muted-foreground">{m.label}</span>
           </div>
         ))}
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between gap-2 text-xs text-white/38">
+      <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
         <span>
           Resp. média:{" "}
-          <span className="font-mono text-white/60">
+          <span className="font-mono text-foreground/60">
             {formatResponseTime(agent.metrics.avgResponseTimeSeconds)}
           </span>
         </span>
@@ -83,7 +83,7 @@ export function AgentDashboardCard({ agent }: AgentCardProps) {
       {agent.metrics.attentionCount > 0 && (
         <Link
           href={`/conversations?agentId=${agent.id}&mode=human`}
-          className="flex items-center gap-1.5 rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/15"
+          className="flex items-center gap-1.5 rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-600 transition-colors hover:bg-amber-500/15 dark:text-amber-400"
         >
           <AlertTriangle size={12} strokeWidth={1.5} />
           {agent.metrics.attentionCount}{" "}

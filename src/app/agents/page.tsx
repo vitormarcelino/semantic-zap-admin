@@ -13,7 +13,7 @@ export default async function AgentsPage() {
       actions={
         <Link
           href="/agents/new"
-          className="flex items-center gap-1.5 rounded-lg bg-[#00D060] px-3 py-1.5 text-sm font-medium text-[#081a0e] transition-colors hover:bg-[#00A84F]"
+          className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <Plus size={14} strokeWidth={2} strokeLinecap="round" />
           Novo Agente
@@ -21,26 +21,26 @@ export default async function AgentsPage() {
       }
     >
       {agents.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-white/8 bg-[#1F2535] py-20">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#00D060]/10">
+        <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-border bg-card py-20">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent">
             <Bot
               size={24}
-              className="text-[#00D060]"
+              className="text-accent-foreground"
               strokeWidth={1.5}
               strokeLinecap="round"
             />
           </div>
           <div className="flex flex-col items-center gap-1 text-center">
-            <p className="text-sm font-medium text-white">
+            <p className="text-sm font-medium text-foreground">
               Nenhum agente cadastrado
             </p>
-            <p className="text-xs text-white/38">
+            <p className="text-xs text-muted-foreground">
               Crie seu primeiro agente para começar
             </p>
           </div>
           <Link
             href="/agents/new"
-            className="flex items-center gap-1.5 rounded-lg bg-[#00D060] px-4 py-2 text-sm font-medium text-[#081a0e] transition-colors hover:bg-[#00A84F]"
+            className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Plus size={14} strokeWidth={2} strokeLinecap="round" />
             Criar agente

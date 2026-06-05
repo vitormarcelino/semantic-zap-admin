@@ -12,13 +12,7 @@ interface MetricCardProps {
 
 function ArrowUp() {
   return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      aria-hidden="true"
-    >
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
       <path
         d="M6 9.5V2.5M6 2.5L2.5 6M6 2.5L9.5 6"
         stroke="currentColor"
@@ -32,13 +26,7 @@ function ArrowUp() {
 
 function ArrowDown() {
   return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      aria-hidden="true"
-    >
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
       <path
         d="M6 2.5V9.5M6 9.5L2.5 6M6 9.5L9.5 6"
         stroke="currentColor"
@@ -61,19 +49,18 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        "relative flex flex-col gap-3 rounded-xl bg-[#1F2535] border border-white/8 px-5 py-4",
+        "relative flex flex-col gap-3 rounded-xl border border-border bg-card px-5 py-4",
         className
       )}
     >
-      {/* Header row */}
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-white/38 uppercase tracking-wider">
+        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {label}
         </span>
         {Icon && (
           <Icon
             size={20}
-            className="text-white/20"
+            className="text-muted-foreground/40"
             strokeWidth={1.5}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -81,17 +68,15 @@ export function MetricCard({
         )}
       </div>
 
-      {/* Value */}
-      <p className="font-mono text-2xl font-medium text-white tracking-tight">
+      <p className="font-mono text-2xl font-medium tracking-tight text-foreground">
         {value}
       </p>
 
-      {/* Delta */}
       {delta && deltaType && (
         <div
           className={cn(
             "flex items-center gap-1 text-xs font-medium",
-            deltaType === "up" ? "text-[#00D060]" : "text-[#EF4444]"
+            deltaType === "up" ? "text-primary" : "text-destructive"
           )}
         >
           {deltaType === "up" ? <ArrowUp /> : <ArrowDown />}

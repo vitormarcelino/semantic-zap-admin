@@ -25,15 +25,15 @@ function AgentItem({ agent, isSelected, onClick }: AgentItemProps) {
       className={cn(
         "w-full rounded-lg px-3 py-2.5 text-left transition-colors",
         isSelected
-          ? "bg-[#00D060]/10 text-white"
-          : "text-white/60 hover:bg-white/5 hover:text-white/80"
+          ? "bg-accent text-accent-foreground"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground"
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex min-w-0 items-center gap-2">
           <Bot
             size={14}
-            className={cn(isSelected ? "text-[#00D060]" : "text-white/30")}
+            className={cn(isSelected ? "text-accent-foreground" : "text-muted-foreground/50")}
             strokeWidth={1.5}
           />
           <span className="truncate text-sm font-medium">{agent.name}</span>
@@ -48,7 +48,7 @@ function AgentItem({ agent, isSelected, onClick }: AgentItemProps) {
           <span
             className={cn(
               "font-mono text-[10px]",
-              isSelected ? "text-white/50" : "text-white/25"
+              isSelected ? "text-accent-foreground/60" : "text-muted-foreground/40"
             )}
           >
             {agent.conversationCount}
@@ -57,7 +57,7 @@ function AgentItem({ agent, isSelected, onClick }: AgentItemProps) {
       </div>
 
       {agent.phoneNumber && (
-        <p className="mt-0.5 truncate font-mono text-[10px] text-white/25 pl-5">
+        <p className="mt-0.5 truncate pl-5 font-mono text-[10px] text-muted-foreground/40">
           {agent.phoneNumber}
         </p>
       )}
@@ -75,18 +75,18 @@ export function AgentSelector({ selectedAgentId, onSelect }: AgentSelectorProps)
   }, [selectedAgentId, agents, onSelect])
 
   return (
-    <div className="flex h-full w-60 shrink-0 flex-col border-r border-white/8 bg-[#181C26]">
-      <div className="border-b border-white/8 px-4 py-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-white/40">Agents</h2>
+    <div className="flex h-full w-60 shrink-0 flex-col border-r border-border bg-sidebar">
+      <div className="border-b border-border px-4 py-3">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Agents</h2>
       </div>
 
       <div className="flex-1 overflow-y-auto p-2">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 size={18} className="animate-spin text-white/30" strokeWidth={1.5} />
+            <Loader2 size={18} className="animate-spin text-muted-foreground/50" strokeWidth={1.5} />
           </div>
         ) : !agents || agents.length === 0 ? (
-          <p className="py-8 text-center text-xs text-white/30">No agents found</p>
+          <p className="py-8 text-center text-xs text-muted-foreground/50">No agents found</p>
         ) : (
           agents.map((agent) => (
             <AgentItem

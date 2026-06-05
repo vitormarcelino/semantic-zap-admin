@@ -52,10 +52,10 @@ export function BotVsHumanChart({ data }: BotVsHumanChartProps) {
         </ResponsiveContainer>
         {/* Center label */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-mono text-xl font-medium text-white">
+          <span className="font-mono text-xl font-medium text-foreground">
             {new Intl.NumberFormat("pt-BR").format(total)}
           </span>
-          <span className="text-xs text-white/38">mensagens</span>
+          <span className="text-xs text-muted-foreground">mensagens</span>
         </div>
       </div>
       {/* Legend */}
@@ -66,7 +66,7 @@ export function BotVsHumanChart({ data }: BotVsHumanChartProps) {
               className="h-2.5 w-2.5 rounded-full"
               style={{ background: COLORS[i] }}
             />
-            <span className="text-xs text-white/60">
+            <span className="text-xs text-muted-foreground">
               {s.name} — {s.pct}%
             </span>
           </div>

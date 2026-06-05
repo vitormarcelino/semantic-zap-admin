@@ -17,30 +17,28 @@ export default async function EditAgentPage({ params }: EditAgentPageProps) {
 
   return (
     <Shell title="Editar Agente">
-      <div className="mx-auto max-w-2xl">
-        <AgentForm
-          action={boundAction}
-          defaultValues={{
-            name: agent.name,
-            description: agent.description,
-            phoneNumber: agent.phoneNumber,
-            provider: agent.provider,
-            language: agent.language,
-            tone: agent.tone,
-            model: agent.model,
-            temperature: agent.temperature,
-            maxTokens: agent.maxTokens,
-            systemPrompt: agent.systemPrompt,
-            greetingPrompt: agent.greetingPrompt,
-            fallbackPrompt: agent.fallbackPrompt,
-            whatsappPhoneNumberId: agent.whatsappPhoneNumberId,
-            whatsappAccessTokenSet: !!agent.whatsappAccessToken,
-            twilioAccountSid: agent.twilioAccountSid,
-            twilioAuthTokenSet: !!agent.twilioAuthToken,
-            telegramBotTokenSet: !!agent.telegramBotToken,
-          }}
-        />
-      </div>
+      <AgentForm
+        action={boundAction}
+        defaultValues={{
+          name: agent.name,
+          description: agent.description,
+          phoneNumber: agent.phoneNumber,
+          provider: agent.provider,
+          language: agent.language,
+          tone: agent.tone,
+          model: agent.model,
+          temperature: agent.temperature,
+          maxTokens: agent.maxTokens,
+          systemPrompt: agent.systemPrompt,
+          greetingPrompt: agent.greetingPrompt,
+          fallbackPrompt: agent.fallbackPrompt,
+          whatsappPhoneNumberId: agent.whatsappPhoneNumberId,
+          whatsappAccessTokenSet: !!agent.whatsappAccessToken,
+          twilioAccountSid: agent.twilioAccountSid,
+          twilioAuthTokenSet: !!agent.twilioAuthToken,
+          telegramBotTokenSet: !!agent.telegramBotToken,
+        }}
+      />
     </Shell>
   )
 }

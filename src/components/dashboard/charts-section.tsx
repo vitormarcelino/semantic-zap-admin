@@ -31,7 +31,7 @@ const BotVsHumanChart = dynamic(
 function ChartLoader({ height }: { height: number }) {
   return (
     <div
-      className="animate-pulse rounded-lg bg-white/5"
+      className="animate-pulse rounded-lg bg-muted"
       style={{ height }}
     />
   )
@@ -47,14 +47,14 @@ export function ChartsSection({ charts, period }: ChartsSectionProps) {
     <div className="flex flex-col gap-4">
       {/* Line + Donut */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="flex flex-col gap-3 rounded-xl border border-white/8 bg-[#1F2535] px-5 py-4 lg:col-span-2">
-          <span className="text-xs font-medium uppercase tracking-wider text-white/38">
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-card px-5 py-4 lg:col-span-2">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Volume de mensagens
           </span>
           <MessageVolumeChart data={charts.messageVolume} period={period} />
         </div>
-        <div className="flex flex-col gap-3 rounded-xl border border-white/8 bg-[#1F2535] px-5 py-4">
-          <span className="text-xs font-medium uppercase tracking-wider text-white/38">
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-card px-5 py-4">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Bot vs Humano
           </span>
           <BotVsHumanChart data={charts.botVsHuman} />
@@ -62,8 +62,8 @@ export function ChartsSection({ charts, period }: ChartsSectionProps) {
       </div>
 
       {/* Bar chart */}
-      <div className="flex flex-col gap-3 rounded-xl border border-white/8 bg-[#1F2535] px-5 py-4">
-        <span className="text-xs font-medium uppercase tracking-wider text-white/38">
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card px-5 py-4">
+        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Conversas por dia
         </span>
         <ConversationsPerDayChart

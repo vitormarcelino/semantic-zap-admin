@@ -24,7 +24,7 @@ function ToolbarButton({
       type="button"
       title={title}
       onClick={onClick}
-      className="flex h-7 w-7 items-center justify-center rounded text-white/50 transition-colors hover:bg-white/8 hover:text-white"
+      className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
     >
       {children}
     </button>
@@ -76,8 +76,8 @@ export function WhatsappEditor({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-white/8 bg-[#0F1117] transition-colors focus-within:border-[#00D060]/50 focus-within:ring-1 focus-within:ring-[#00D060]/20">
-      <div className="flex items-center gap-0.5 border-b border-white/8 px-2 py-1.5">
+    <div className="overflow-hidden rounded-lg border border-border bg-background transition-colors focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20">
+      <div className="flex items-center gap-0.5 border-b border-border px-2 py-1.5">
         <ToolbarButton title="Negrito (*texto*)" onClick={() => wrapText("*", "*")}>
           <Bold size={13} strokeWidth={2} />
         </ToolbarButton>
@@ -93,13 +93,13 @@ export function WhatsappEditor({
         >
           <Code size={13} strokeWidth={2} />
         </ToolbarButton>
-        <div className="mx-1 h-4 w-px bg-white/12" />
+        <div className="mx-1 h-4 w-px bg-border" />
         <PopoverPrimitive.Root>
           <PopoverPrimitive.Trigger asChild>
             <button
               type="button"
               title="Emoji"
-              className="flex h-7 w-7 items-center justify-center rounded text-white/50 transition-colors hover:bg-white/8 hover:text-white"
+              className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <Smile size={13} strokeWidth={2} />
             </button>
@@ -109,7 +109,7 @@ export function WhatsappEditor({
               side="bottom"
               align="start"
               sideOffset={4}
-              className="z-50 w-52 rounded-xl border border-white/8 bg-[#181C26] p-2 shadow-xl"
+              className="z-50 w-52 rounded-xl border border-border bg-popover p-2 shadow-xl"
             >
               <div className="grid grid-cols-6 gap-0.5">
                 {EMOJIS.map((emoji) => (
@@ -117,7 +117,7 @@ export function WhatsappEditor({
                     key={emoji}
                     type="button"
                     onClick={() => insertEmoji(emoji)}
-                    className="flex h-8 w-8 items-center justify-center rounded text-base transition-colors hover:bg-white/8"
+                    className="flex h-8 w-8 items-center justify-center rounded text-base transition-colors hover:bg-muted"
                   >
                     {emoji}
                   </button>
@@ -126,7 +126,7 @@ export function WhatsappEditor({
             </PopoverPrimitive.Content>
           </PopoverPrimitive.Portal>
         </PopoverPrimitive.Root>
-        <span className="ml-auto font-mono text-[10px] text-white/20">
+        <span className="ml-auto font-mono text-[10px] text-muted-foreground/40">
           WhatsApp
         </span>
       </div>
@@ -137,7 +137,7 @@ export function WhatsappEditor({
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
         rows={4}
-        className="w-full resize-none bg-transparent px-3 py-2.5 text-sm text-white/90 placeholder:text-white/25 focus:outline-none"
+        className="w-full resize-none bg-transparent px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
       />
     </div>
   )

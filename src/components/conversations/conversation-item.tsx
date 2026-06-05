@@ -19,7 +19,6 @@ function relativeTime(date: string): string {
 }
 
 function formatPhone(phone: string): string {
-  // Minimal formatting: +55 11 99999-9999
   const digits = phone.replace(/\D/g, "")
   if (digits.length === 13 && digits.startsWith("55")) {
     return `+55 ${digits.slice(2, 4)} ${digits.slice(4, 9)}-${digits.slice(9)}`
@@ -38,31 +37,31 @@ export function ConversationItem({ conversation: c, isSelected, onClick }: Conve
       type="button"
       onClick={onClick}
       className={cn(
-        "relative w-full text-left px-4 py-3 transition-colors border-b border-white/5",
-        "hover:bg-white/4",
-        isSelected ? "bg-white/6" : "",
+        "relative w-full border-b border-border px-4 py-3 text-left transition-colors",
+        "hover:bg-muted/50",
+        isSelected ? "bg-muted" : "",
         attention ? "border-l-2 border-l-amber-500/70 pl-3.5" : "border-l-2 border-l-transparent"
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <span className="truncate text-sm font-medium text-white">
+        <span className="truncate text-sm font-medium text-foreground">
           {formatPhone(c.phoneNumber)}
         </span>
-        <span className="shrink-0 font-mono text-[10px] text-white/35">
+        <span className="shrink-0 font-mono text-[10px] text-muted-foreground/60">
           {relativeTime(c.lastMessageAt)}
         </span>
       </div>
 
       <div className="mt-0.5 flex items-center justify-between gap-2">
-        <p className="truncate text-xs text-white/45 max-w-[85%]">
+        <p className="max-w-[85%] truncate text-xs text-muted-foreground">
           {c.lastMessage?.content ?? "No messages yet"}
         </p>
 
         <div className="flex shrink-0 items-center gap-1">
           {c.mode === "human" ? (
-            <User size={11} className="text-amber-400" strokeWidth={1.5} />
+            <User size={11} className="text-amber-500 dark:text-amber-400" strokeWidth={1.5} />
           ) : (
-            <Bot size={11} className="text-[#00D060]/60" strokeWidth={1.5} />
+            <Bot size={11} className="text-primary/60" strokeWidth={1.5} />
           )}
           {c.unreadCount > 0 && (
             <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 font-mono text-[9px] font-bold text-black">

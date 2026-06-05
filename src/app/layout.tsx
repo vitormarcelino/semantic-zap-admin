@@ -33,6 +33,7 @@ export default function RootLayout({
       <html
         lang="pt-BR"
         className={`${dmSans.variable} ${jetbrainsMono.variable} h-full`}
+        suppressHydrationWarning
       >
         <body className="min-h-full flex flex-col">
           <Providers>{children}</Providers>

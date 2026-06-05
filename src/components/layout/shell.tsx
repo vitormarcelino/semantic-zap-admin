@@ -8,13 +8,13 @@ interface ShellProps {
 
 export function Shell({ children, title, actions }: ShellProps) {
   return (
-    <div className="flex h-screen bg-[#0F1117]">
+    <div className="flex h-screen bg-background">
       <Sidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Inner header */}
-        <header className="flex shrink-0 items-center justify-between border-b border-white/8 px-6 py-4">
-          <h1 className="text-base font-semibold text-white">{title}</h1>
+        <header className="flex shrink-0 items-center justify-between border-b border-border px-6 py-4">
+          <h1 className="text-base font-semibold text-foreground">{title}</h1>
           {actions && (
             <div className="flex items-center gap-2">{actions}</div>
           )}

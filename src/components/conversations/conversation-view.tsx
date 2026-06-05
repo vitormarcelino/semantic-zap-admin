@@ -15,9 +15,9 @@ interface ConversationViewProps {
 
 function SSEDot({ connected }: { connected: boolean }) {
   return (
-    <span className="flex items-center gap-1.5 text-xs text-white/40">
+    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
       <span
-        className={`inline-block h-1.5 w-1.5 rounded-full ${connected ? "bg-[#00D060]" : "bg-red-400"}`}
+        className={`inline-block h-1.5 w-1.5 rounded-full ${connected ? "bg-primary" : "bg-destructive"}`}
       />
       {connected ? "Live" : "Reconnecting..."}
     </span>
@@ -31,8 +31,6 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
   const isNearBottomRef = useRef(true)
 
   const { connected } = useSSE((_event: SSEEvent) => {
-    // useConversation handles all SSE event updates via its own useSSE call.
-    // This separate hook instance is used only for the connection status indicator.
     void _event
   })
 
@@ -40,7 +38,6 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [])
 
-  // Scroll to bottom when messages load or new message arrives
   useEffect(() => {
     if (isNearBottomRef.current) {
       scrollToBottom()
@@ -55,13 +52,10 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
   }
 
   function handleModeChange(mode: ConversationMode) {
-    // SSE event will update the query cache automatically
-    // This is a local optimistic update for immediate feedback
     void mode
   }
 
   function handleMessageSent(_msg: MessageRecord) {
-    // SSE new_message event will append to cache; scroll to bottom
     void _msg
     isNearBottomRef.current = true
     setTimeout(scrollToBottom, 50)
@@ -70,7 +64,7 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <Loader2 size={24} className="animate-spin text-white/30" strokeWidth={1.5} />
+        <Loader2 size={24} className="animate-spin text-muted-foreground/50" strokeWidth={1.5} />
       </div>
     )
   }
@@ -78,7 +72,7 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
   if (error || !data) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-sm text-white/40">Failed to load conversation</p>
+        <p className="text-sm text-muted-foreground">Failed to load conversation</p>
       </div>
     )
   }
@@ -86,10 +80,10 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex shrink-0 items-center justify-between border-b border-white/8 px-4 py-3">
+      <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
         <div>
-          <p className="text-sm font-medium text-white">{data.phoneNumber}</p>
-          <p className="text-xs text-white/40">{data.agentName}</p>
+          <p className="text-sm font-medium text-foreground">{data.phoneNumber}</p>
+          <p className="text-xs text-muted-foreground">{data.agentName}</p>
         </div>
         <div className="flex items-center gap-3">
           <SSEDot connected={connected} />
@@ -105,13 +99,13 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 space-y-2"
+        className="flex-1 space-y-2 overflow-y-auto p-4"
       >
         {data.messagesTotal > data.messages.length && (
           <div className="flex justify-center pb-2">
             <button
               type="button"
-              className="flex items-center gap-1 rounded-lg border border-white/8 px-3 py-1.5 text-xs text-white/40 hover:bg-white/5 transition-colors"
+              className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted"
             >
               <ChevronUp size={12} strokeWidth={1.5} />
               Load older messages
@@ -137,13 +131,13 @@ export function ConversationView({ conversationId }: ConversationViewProps) {
 
 export function ConversationEmptyState() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 text-center px-8">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5">
-        <MessageSquare size={28} className="text-white/20" strokeWidth={1} />
+    <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+        <MessageSquare size={28} className="text-muted-foreground/40" strokeWidth={1} />
       </div>
       <div>
-        <p className="text-sm font-medium text-white/50">Select a conversation</p>
-        <p className="mt-1 text-xs text-white/30">
+        <p className="text-sm font-medium text-muted-foreground">Select a conversation</p>
+        <p className="mt-1 text-xs text-muted-foreground/60">
           Choose an agent and conversation from the left to start monitoring
         </p>
       </div>

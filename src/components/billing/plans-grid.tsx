@@ -21,7 +21,7 @@ export function PlansGrid({ onSelectPlan, isLoading }: PlansGridProps) {
     <div className="flex flex-col gap-6">
       {/* Billing cycle toggle */}
       <div className="flex items-center justify-center">
-        <div className="inline-flex rounded-lg border border-white/8 bg-[#181C26] p-0.5">
+        <div className="inline-flex rounded-lg border border-border bg-muted p-0.5">
           {(["monthly", "yearly"] as const).map((cycle) => (
             <button
               key={cycle}
@@ -29,13 +29,13 @@ export function PlansGrid({ onSelectPlan, isLoading }: PlansGridProps) {
               className={cn(
                 "rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
                 billingCycle === cycle
-                  ? "bg-[#1F2535] text-white shadow-sm"
-                  : "text-white/40 hover:text-white/70"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               {cycle === "monthly" ? "Mensal" : "Anual"}
               {cycle === "yearly" && (
-                <span className="ml-1.5 text-[10px] font-semibold text-[#00D060]">-17%</span>
+                <span className="ml-1.5 text-[10px] font-semibold text-primary">-17%</span>
               )}
             </button>
           ))}

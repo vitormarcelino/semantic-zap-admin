@@ -12,19 +12,19 @@ function MeterBar({ used, limit, label }: { used: number; limit: number; label: 
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-white/50">{label}</span>
-        <span className="font-mono text-xs text-white/70">
+        <span className="text-xs text-muted-foreground">{label}</span>
+        <span className="font-mono text-xs text-foreground/70">
           {used.toLocaleString("pt-BR")}
           {isUnlimited ? "" : ` / ${limit.toLocaleString("pt-BR")}`}
-          {isUnlimited && <span className="text-[#00D060] ml-1">ilimitado</span>}
+          {isUnlimited && <span className="ml-1 text-primary">ilimitado</span>}
         </span>
       </div>
       {!isUnlimited && (
-        <div className="h-1.5 w-full rounded-full bg-white/8">
+        <div className="h-1.5 w-full rounded-full bg-border">
           <div
             className={cn(
               "h-1.5 rounded-full transition-all",
-              isAtLimit ? "bg-red-500" : isNearLimit ? "bg-orange-400" : "bg-[#00D060]"
+              isAtLimit ? "bg-destructive" : isNearLimit ? "bg-amber-500" : "bg-primary"
             )}
             style={{ width: `${pct}%` }}
           />

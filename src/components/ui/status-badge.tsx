@@ -7,32 +7,32 @@ const variants: Record<
   { dot: string; pulse: boolean; label: string; text: string; bg: string }
 > = {
   online: {
-    dot: "bg-[#00D060]",
+    dot: "bg-primary",
     pulse: true,
     label: "Online",
-    text: "text-[#00D060]",
-    bg: "bg-[#00D060]/10",
+    text: "text-primary",
+    bg: "bg-accent",
   },
   offline: {
-    dot: "bg-white/25",
+    dot: "bg-muted-foreground/25",
     pulse: false,
     label: "Offline",
-    text: "text-white/38",
-    bg: "bg-white/5",
+    text: "text-muted-foreground",
+    bg: "bg-muted",
   },
   error: {
-    dot: "bg-[#EF4444]",
+    dot: "bg-destructive",
     pulse: false,
     label: "Erro",
-    text: "text-[#EF4444]",
-    bg: "bg-[#EF4444]/10",
+    text: "text-destructive",
+    bg: "bg-destructive/10",
   },
   warning: {
-    dot: "bg-[#F59E0B]",
+    dot: "bg-amber-500",
     pulse: false,
     label: "Atenção",
-    text: "text-[#F59E0B]",
-    bg: "bg-[#F59E0B]/10",
+    text: "text-amber-600 dark:text-amber-400",
+    bg: "bg-amber-500/10",
   },
 }
 

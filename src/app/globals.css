@@ -59,14 +59,49 @@
   --color-zap-blue: #3B82F6;
 }
 
+/* ── Light theme (default / enterprise-first) ────────────────────── */
 :root {
-  /* Typography — resolved from next/font/google variables set on <html> */
   --font-sans: var(--font-dm-sans, 'DM Sans', sans-serif);
   --font-mono: var(--font-jetbrains-mono, 'JetBrains Mono', monospace);
-
   --radius: 0.75rem;
 
-  /* SemanticZap dark-first palette */
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  --primary: #00D060;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #334155;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  --accent: rgba(0, 208, 96, 0.10);
+  --accent-foreground: #007A3D;
+  --destructive: #DC2626;
+  --border: rgba(0, 0, 0, 0.08);
+  --input: rgba(0, 0, 0, 0.06);
+  --ring: rgba(0, 208, 96, 0.40);
+
+  --chart-1: #00D060;
+  --chart-2: #3B82F6;
+  --chart-3: #F59E0B;
+  --chart-4: #EF4444;
+  --chart-5: #94A3B8;
+
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0F172A;
+  --sidebar-primary: #00D060;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(0, 208, 96, 0.10);
+  --sidebar-accent-foreground: #007A3D;
+  --sidebar-border: rgba(0, 0, 0, 0.08);
+  --sidebar-ring: rgba(0, 208, 96, 0.40);
+}
+
+/* ── Dark theme ───────────────────────────────────────────────────── */
+.dark {
   --background: #0F1117;
   --foreground: #F2F4F8;
   --card: #1F2535;
@@ -121,19 +156,32 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.12);
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.20);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.10);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.20);
 }
 
 /* Dot-grid texture utility for backgrounds */
 .bg-dot-grid {
   background-image: radial-gradient(
     circle,
-    rgba(255, 255, 255, 0.04) 1px,
+    rgba(0, 0, 0, 0.04) 1px,
     transparent 1px
   );
   background-size: 24px 24px;
+}
+.dark .bg-dot-grid {
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.04) 1px,
+    transparent 1px
+  );
 }

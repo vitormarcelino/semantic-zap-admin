@@ -95,7 +95,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="flex items-center gap-1.5 rounded-lg bg-[#00D060] px-4 py-2 text-sm font-medium text-[#081a0e] transition-colors hover:bg-[#00A84F] disabled:cursor-not-allowed disabled:opacity-50"
+      className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
     >
       <Save size={14} strokeWidth={1.5} strokeLinecap="round" />
       {pending ? "Salvando..." : "Salvar"}
@@ -106,7 +106,6 @@ function SubmitButton() {
 export function AgentForm({ action, defaultValues }: AgentFormProps) {
   const [state, formAction] = useActionState(action, {})
 
-  // Controlled field state
   const [provider, setProvider] = useState(defaultValues?.provider ?? "")
   const [language, setLanguage] = useState(
     defaultValues?.language ?? AGENT_DEFAULTS.language
@@ -122,10 +121,8 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
     defaultValues?.maxTokens ?? AGENT_DEFAULTS.maxTokens
   )
 
-  // Tab state
   const [activeTab, setActiveTab] = useState<TabId>("canal")
 
-  // Avançado section — auto-expand if any advanced field has non-default value
   const hasNonDefaultAdvanced =
     (defaultValues?.model ?? AGENT_DEFAULTS.model) !== AGENT_DEFAULTS.model ||
     (defaultValues?.temperature ?? AGENT_DEFAULTS.temperature) !==
@@ -134,14 +131,12 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
       AGENT_DEFAULTS.maxTokens
   const [advancedOpen, setAdvancedOpen] = useState(hasNonDefaultAdvanced)
 
-  // Tab error indicators (derived from server action response)
   const tabErrors: Record<TabId, boolean> = {
     canal: !!state.fieldErrors?.name,
     ia: false,
     mensagens: false,
   }
 
-  // Keyboard navigation for tablist
   const handleTabKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       const ids: TabId[] = ["canal", "ia", "mensagens"]
@@ -160,19 +155,19 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
   return (
     <form action={formAction} className="flex flex-col gap-4">
       {state.error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {state.error}
         </div>
       )}
 
       {/* Tab card */}
-      <div className="overflow-hidden rounded-xl border border-white/8 bg-[#1F2535]">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
         {/* Tab header */}
         <div
           role="tablist"
           aria-label="Configurações do agente"
           onKeyDown={handleTabKeyDown}
-          className="flex overflow-x-auto border-b border-white/8"
+          className="flex overflow-x-auto border-b border-border"
         >
           {TABS.map((tab) => {
             const isActive = activeTab === tab.id
@@ -189,15 +184,15 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
                 className={cn(
                   "relative flex shrink-0 items-center gap-2 whitespace-nowrap px-5 py-3.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "text-white after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#00D060]"
-                    : "text-white/38 hover:text-white/60"
+                    ? "text-foreground after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {tab.label}
                 {hasError && (
                   <span
                     aria-label="Contém erros"
-                    className="h-1.5 w-1.5 rounded-full bg-red-500"
+                    className="h-1.5 w-1.5 rounded-full bg-destructive"
                   />
                 )}
               </button>
@@ -225,7 +220,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
                   aria-invalid={!!state.fieldErrors?.name}
                 />
                 {state.fieldErrors?.name && (
-                  <p className="text-xs text-red-400">
+                  <p className="text-xs text-destructive">
                     {state.fieldErrors.name}
                   </p>
                 )}
@@ -272,14 +267,14 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
               </div>
 
               {provider && (
-                <div className="grid gap-4 rounded-lg border border-white/8 p-4">
-                  <p className="text-xs font-medium uppercase tracking-wider text-white/38">Credenciais</p>
+                <div className="grid gap-4 rounded-lg border border-border p-4">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Credenciais</p>
 
                   {provider === "whatsapp" && (
                     <>
                       <div className="flex flex-col gap-1.5">
                         <Label htmlFor="whatsappPhoneNumberId">Phone Number ID</Label>
-                        <p className="text-xs text-white/38">ID numérico do número no Meta Business.</p>
+                        <p className="text-xs text-muted-foreground">ID numérico do número no Meta Business.</p>
                         <Input
                           id="whatsappPhoneNumberId"
                           name="whatsappPhoneNumberId"
@@ -290,7 +285,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
                       </div>
                       <div className="flex flex-col gap-1.5">
                         <Label htmlFor="whatsappAccessToken">Access Token</Label>
-                        <p className="text-xs text-white/38">Token de acesso permanente da Meta.</p>
+                        <p className="text-xs text-muted-foreground">Token de acesso permanente da Meta.</p>
                         <Input
                           id="whatsappAccessToken"
                           name="whatsappAccessToken"
@@ -306,7 +301,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
                     <>
                       <div className="flex flex-col gap-1.5">
                         <Label htmlFor="twilioAccountSid">Account SID</Label>
-                        <p className="text-xs text-white/38">SID da conta Twilio.</p>
+                        <p className="text-xs text-muted-foreground">SID da conta Twilio.</p>
                         <Input
                           id="twilioAccountSid"
                           name="twilioAccountSid"
@@ -317,7 +312,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
                       </div>
                       <div className="flex flex-col gap-1.5">
                         <Label htmlFor="twilioAuthToken">Auth Token</Label>
-                        <p className="text-xs text-white/38">Token de autenticação da conta Twilio.</p>
+                        <p className="text-xs text-muted-foreground">Token de autenticação da conta Twilio.</p>
                         <Input
                           id="twilioAuthToken"
                           name="twilioAuthToken"
@@ -332,7 +327,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
                   {provider === "telegram" && (
                     <div className="flex flex-col gap-1.5">
                       <Label htmlFor="telegramBotToken">Bot Token</Label>
-                      <p className="text-xs text-white/38">Token do bot gerado pelo @BotFather.</p>
+                      <p className="text-xs text-muted-foreground">Token do bot gerado pelo @BotFather.</p>
                       <Input
                         id="telegramBotToken"
                         name="telegramBotToken"
@@ -354,9 +349,10 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
             aria-labelledby="tab-ia"
             className={activeTab === "ia" ? "block" : "hidden"}
           >
-            <div className="grid gap-5">
-              {/* Language + Tone */}
-              <div className="grid grid-cols-2 gap-4">
+            {/* Two-column layout on large screens: settings left, prompt right */}
+            <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[280px_1fr] lg:gap-6">
+              {/* Left column: Language, Tone, Advanced */}
+              <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
                   <Label>Idioma</Label>
                   <Select value={language} onValueChange={setLanguage}>
@@ -373,6 +369,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
                   </Select>
                   <input type="hidden" name="language" value={language} />
                 </div>
+
                 <div className="flex flex-col gap-1.5">
                   <Label>Tom / Estilo</Label>
                   <Select value={tone} onValueChange={setTone}>
@@ -389,109 +386,102 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
                   </Select>
                   <input type="hidden" name="tone" value={tone} />
                 </div>
+
+                {/* Advanced — collapsible */}
+                <div className="rounded-lg border border-border">
+                  <button
+                    type="button"
+                    onClick={() => setAdvancedOpen((o) => !o)}
+                    aria-expanded={advancedOpen}
+                    className="flex w-full items-center justify-between px-4 py-3 text-left"
+                  >
+                    <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Avançado
+                    </span>
+                    <ChevronDown
+                      size={14}
+                      strokeWidth={1.5}
+                      className={cn(
+                        "text-muted-foreground transition-transform duration-200",
+                        advancedOpen && "rotate-180"
+                      )}
+                    />
+                  </button>
+
+                  <div
+                    className={cn(
+                      "overflow-hidden transition-[max-height] duration-200 ease-in-out",
+                      advancedOpen ? "max-h-[500px]" : "max-h-0"
+                    )}
+                  >
+                    <div className="grid gap-5 border-t border-border px-4 pb-4 pt-4">
+                      <div className="flex flex-col gap-1.5">
+                        <Label>Modelo LLM</Label>
+                        <Select value={model} onValueChange={setModel}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {AGENT_MODELS.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <input type="hidden" name="model" value={model} />
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <Label>Criatividade</Label>
+                          <span className="font-mono text-xs text-muted-foreground">
+                            {temperature.toFixed(2)}
+                          </span>
+                        </div>
+                        <Slider
+                          value={[temperature]}
+                          onValueChange={([v]) => setTemperature(v)}
+                          min={TEMPERATURE_CONFIG.min}
+                          max={TEMPERATURE_CONFIG.max}
+                          step={TEMPERATURE_CONFIG.step}
+                        />
+                        <input type="hidden" name="temperature" value={temperature} />
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <Label>Tokens máximos</Label>
+                          <span className="font-mono text-xs text-muted-foreground">
+                            {maxTokens}
+                          </span>
+                        </div>
+                        <Slider
+                          value={[maxTokens]}
+                          onValueChange={([v]) => setMaxTokens(v)}
+                          min={MAX_TOKENS_CONFIG.min}
+                          max={MAX_TOKENS_CONFIG.max}
+                          step={50}
+                        />
+                        <input type="hidden" name="maxTokens" value={maxTokens} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* System Prompt */}
+              {/* Right column: System Prompt */}
               <div className="flex flex-col gap-1.5">
                 <Label>{AGENT_PROMPT_LABELS.system}</Label>
-                <p className="text-xs text-white/38">
+                <p className="text-xs text-muted-foreground">
                   {AGENT_PROMPT_DESCRIPTIONS.system}
                 </p>
                 <MarkdownEditor
                   name="systemPrompt"
                   defaultValue={defaultValues?.systemPrompt}
                   placeholder="Você é um assistente especializado em..."
+                  height={440}
                 />
-              </div>
-
-              {/* Avançado — collapsible, fields stay mounted when closed */}
-              <div className="rounded-lg border border-white/8">
-                <button
-                  type="button"
-                  onClick={() => setAdvancedOpen((o) => !o)}
-                  aria-expanded={advancedOpen}
-                  className="flex w-full items-center justify-between px-4 py-3 text-left"
-                >
-                  <span className="text-xs font-medium uppercase tracking-wider text-white/38">
-                    Avançado
-                  </span>
-                  <ChevronDown
-                    size={14}
-                    strokeWidth={1.5}
-                    className={cn(
-                      "text-white/38 transition-transform duration-200",
-                      advancedOpen && "rotate-180"
-                    )}
-                  />
-                </button>
-
-                <div
-                  className={cn(
-                    "overflow-hidden transition-[max-height] duration-200 ease-in-out",
-                    advancedOpen ? "max-h-[500px]" : "max-h-0"
-                  )}
-                >
-                  <div className="grid gap-5 border-t border-white/8 px-4 pb-4 pt-4">
-                    <div className="flex flex-col gap-1.5">
-                      <Label>Modelo LLM</Label>
-                      <Select value={model} onValueChange={setModel}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {AGENT_MODELS.map((m) => (
-                            <SelectItem key={m} value={m}>
-                              {m}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <input type="hidden" name="model" value={model} />
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between">
-                        <Label>Criatividade</Label>
-                        <span className="font-mono text-xs text-white/38">
-                          {temperature.toFixed(2)}
-                        </span>
-                      </div>
-                      <Slider
-                        value={[temperature]}
-                        onValueChange={([v]) => setTemperature(v)}
-                        min={TEMPERATURE_CONFIG.min}
-                        max={TEMPERATURE_CONFIG.max}
-                        step={TEMPERATURE_CONFIG.step}
-                      />
-                      <input
-                        type="hidden"
-                        name="temperature"
-                        value={temperature}
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between">
-                        <Label>Tokens máximos</Label>
-                        <span className="font-mono text-xs text-white/38">
-                          {maxTokens}
-                        </span>
-                      </div>
-                      <Slider
-                        value={[maxTokens]}
-                        onValueChange={([v]) => setMaxTokens(v)}
-                        min={MAX_TOKENS_CONFIG.min}
-                        max={MAX_TOKENS_CONFIG.max}
-                        step={50}
-                      />
-                      <input
-                        type="hidden"
-                        name="maxTokens"
-                        value={maxTokens}
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -506,7 +496,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
             <div className="grid gap-6">
               <div className="flex flex-col gap-1.5">
                 <Label>{AGENT_PROMPT_LABELS.greeting}</Label>
-                <p className="text-xs text-white/38">
+                <p className="text-xs text-muted-foreground">
                   {AGENT_PROMPT_DESCRIPTIONS.greeting}
                 </p>
                 <WhatsappEditor
@@ -517,7 +507,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>{AGENT_PROMPT_LABELS.fallback}</Label>
-                <p className="text-xs text-white/38">
+                <p className="text-xs text-muted-foreground">
                   {AGENT_PROMPT_DESCRIPTIONS.fallback}
                 </p>
                 <WhatsappEditor
@@ -528,7 +518,6 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -536,7 +525,7 @@ export function AgentForm({ action, defaultValues }: AgentFormProps) {
       <div className="flex items-center justify-between pt-1">
         <Link
           href="/agents"
-          className="flex items-center gap-1.5 rounded-lg border border-white/8 px-4 py-2 text-sm font-medium text-white/60 transition-colors hover:border-white/16 hover:text-white"
+          className="flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-border/60 hover:text-foreground"
         >
           <ArrowLeft size={14} strokeWidth={1.5} strokeLinecap="round" />
           Cancelar

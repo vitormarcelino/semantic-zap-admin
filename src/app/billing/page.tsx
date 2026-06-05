@@ -43,11 +43,11 @@ export default function BillingPage() {
 
   return (
     <Shell title="Assinatura e Cobrança">
-      <div className="mx-auto max-w-4xl flex flex-col gap-10">
+      <div className="mx-auto flex max-w-4xl flex-col gap-10">
 
         {/* Section 1: Current subscription */}
         <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-white/38">
+          <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Plano atual
           </h2>
           <SubscriptionStatus />
@@ -55,11 +55,11 @@ export default function BillingPage() {
 
         {/* PIX / Boleto payment result */}
         {pendingPayment && (
-          <section className="rounded-xl border border-[#00D060]/20 bg-[#00D060]/5 p-6 flex flex-col gap-4">
-            <h3 className="font-semibold text-white">Pagamento gerado</h3>
+          <section className="flex flex-col gap-4 rounded-xl border border-primary/20 bg-accent p-6">
+            <h3 className="font-semibold text-foreground">Pagamento gerado</h3>
             {pendingPayment.pixQrCode && (
               <div className="flex flex-col gap-3">
-                <p className="text-sm text-white/50">
+                <p className="text-sm text-muted-foreground">
                   Escaneie o QR Code abaixo ou copie o código PIX para pagar.
                 </p>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -73,7 +73,7 @@ export default function BillingPage() {
                 {pendingPayment.pixCopiaECola && (
                   <button
                     onClick={handleCopyPix}
-                    className="inline-flex items-center gap-2 rounded-lg border border-white/8 bg-white/5 px-4 py-2.5 text-sm text-white/70 hover:text-white transition-colors w-fit"
+                    className="inline-flex w-fit items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {copied ? <Check size={14} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" /> : <Copy size={14} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />}
                     {copied ? "Copiado!" : "Copiar código PIX"}
@@ -86,7 +86,7 @@ export default function BillingPage() {
                 href={pendingPayment.bankSlipUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg bg-[#00D060] px-4 py-2.5 text-sm font-semibold text-[#081a0e] hover:bg-[#00D060]/90 transition-colors w-fit"
+                className="inline-flex w-fit items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 <ExternalLink size={14} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
                 Abrir boleto
@@ -97,19 +97,19 @@ export default function BillingPage() {
 
         {/* Section 2: Plan comparison */}
         <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-white/38">
+          <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Planos disponíveis
           </h2>
           <PlansGrid onSelectPlan={handleSelectPlan} />
         </section>
 
-        {/* Section 3: Checkout form (shown when plan is selected) */}
+        {/* Section 3: Checkout form */}
         {selectedPlan && (
           <section className="flex flex-col gap-3">
-            <h2 className="text-xs font-medium uppercase tracking-wider text-white/38">
+            <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Dados de pagamento
             </h2>
-            <div className="rounded-xl border border-white/8 bg-[#1F2535] p-6">
+            <div className="rounded-xl border border-border bg-card p-6">
               <CheckoutForm
                 planId={selectedPlan.id}
                 billingCycle={selectedPlan.cycle}
@@ -122,7 +122,7 @@ export default function BillingPage() {
 
         {/* Section 4: Invoice history */}
         <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-white/38">
+          <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Histórico de faturas
           </h2>
           <InvoiceList />

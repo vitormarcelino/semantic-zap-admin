@@ -70,7 +70,7 @@ export default async function DashboardPage({
 
         {/* Agents */}
         <section>
-          <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/38">
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Agentes
           </h2>
           <AgentGrid agents={agents} />
@@ -78,10 +78,10 @@ export default async function DashboardPage({
 
         {/* Activity feed */}
         <section>
-          <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-white/38">
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Atividade recente
           </h2>
-          <div className="rounded-xl border border-white/8 bg-[#1F2535] px-5">
+          <div className="rounded-xl border border-border bg-card px-5">
             <ActivityFeed items={summary.recentActivity} />
           </div>
         </section>

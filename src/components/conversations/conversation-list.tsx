@@ -45,13 +45,13 @@ export function ConversationList({ agentId, selectedId, onSelect }: Conversation
   ).length
 
   return (
-    <div className="flex h-full flex-col border-r border-white/8 bg-[#181C26]">
+    <div className="flex h-full flex-col border-r border-border bg-sidebar">
       {/* Search */}
-      <div className="p-3 border-b border-white/8">
+      <div className="border-b border-border p-3">
         <div className="relative">
           <Search
             size={14}
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30"
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/50"
             strokeWidth={1.5}
           />
           <input
@@ -59,13 +59,13 @@ export function ConversationList({ agentId, selectedId, onSelect }: Conversation
             placeholder="Search by phone..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-white/8 bg-[#0F1117] py-2 pl-8 pr-3 text-xs text-white placeholder-white/25 outline-none focus:border-white/20"
+            className="w-full rounded-lg border border-border bg-background py-2 pl-8 pr-3 text-xs text-foreground placeholder-muted-foreground outline-none focus:border-border/60"
           />
         </div>
       </div>
 
       {/* Filter tabs */}
-      <div className="flex border-b border-white/8">
+      <div className="flex border-b border-border">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -74,8 +74,8 @@ export function ConversationList({ agentId, selectedId, onSelect }: Conversation
             className={cn(
               "relative flex-1 py-2 text-[11px] font-medium transition-colors",
               activeTab === tab.id
-                ? "text-[#00D060] border-b-2 border-[#00D060]"
-                : "text-white/40 hover:text-white/60"
+                ? "border-b-2 border-primary text-primary"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             {tab.label}
@@ -92,12 +92,12 @@ export function ConversationList({ agentId, selectedId, onSelect }: Conversation
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 size={20} className="animate-spin text-white/30" strokeWidth={1.5} />
+            <Loader2 size={20} className="animate-spin text-muted-foreground/50" strokeWidth={1.5} />
           </div>
         ) : displayConversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-12 text-center px-4">
-            <MessageSquare size={24} className="text-white/15" strokeWidth={1} />
-            <p className="text-xs text-white/30">No conversations yet</p>
+          <div className="flex flex-col items-center justify-center gap-2 px-4 py-12 text-center">
+            <MessageSquare size={24} className="text-muted-foreground/30" strokeWidth={1} />
+            <p className="text-xs text-muted-foreground/50">No conversations yet</p>
           </div>
         ) : (
           displayConversations.map((conv) => (

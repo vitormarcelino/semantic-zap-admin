@@ -63,9 +63,14 @@ EOF
 fi
 
 if [ ! -f "${SHARED_DIR}/nginx/upstreams/agent-service.conf" ]; then
+  agent_upstream_port="8001"
+  if curl --silent --fail http://127.0.0.1:8200/health >/dev/null 2>&1; then
+    agent_upstream_port="8200"
+  fi
   cat > "${SHARED_DIR}/nginx/upstreams/agent-service.conf" <<'EOF'
-set $agent_service_upstream http://127.0.0.1:8001;
+set $agent_service_upstream http://127.0.0.1:__AGENT_UPSTREAM_PORT__;
 EOF
+  sed -i "s/__AGENT_UPSTREAM_PORT__/${agent_upstream_port}/" "${SHARED_DIR}/nginx/upstreams/agent-service.conf"
 fi
 
 cat > /etc/nginx/conf.d/semanticzap-admin.conf <<'EOF'

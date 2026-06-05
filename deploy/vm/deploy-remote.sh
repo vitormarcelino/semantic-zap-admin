@@ -49,7 +49,7 @@ project_name="${APP_NAME}-${next_color}"
 printf '%s' "${REGISTRY_TOKEN}" | docker login -u oauth2accesstoken --password-stdin https://us-east1-docker.pkg.dev >/dev/null
 
 IMAGE_REF="${IMAGE_REF}" HOST_PORT="${host_port}" docker compose -p "${project_name}" -f "${COMPOSE_FILE}" pull app worker
-IMAGE_REF="${IMAGE_REF}" HOST_PORT="${host_port}" docker compose -p "${project_name}" -f "${COMPOSE_FILE}" run --rm --no-deps app npx prisma migrate deploy
+IMAGE_REF="${IMAGE_REF}" HOST_PORT="${host_port}" docker compose -p "${project_name}" -f "${COMPOSE_FILE}" run --rm --no-deps app npx prisma migrate deploy --config prisma.config.ts
 IMAGE_REF="${IMAGE_REF}" HOST_PORT="${host_port}" docker compose -p "${project_name}" -f "${COMPOSE_FILE}" up -d app worker
 
 for _ in $(seq 1 30); do

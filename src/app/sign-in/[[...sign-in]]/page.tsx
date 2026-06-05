@@ -4,15 +4,8 @@ import { useState } from "react"
 import { useSignIn } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
-
-function BoltIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M11 2L3 11H9.5L9 18L17 9H10.5L11 2Z" fill="white" strokeLinejoin="round" />
-    </svg>
-  )
-}
 
 export default function SignInPage() {
   const { signIn, fetchStatus } = useSignIn()
@@ -30,14 +23,12 @@ export default function SignInPage() {
     setError(null)
 
     try {
-      // Complete sign-in in one step with identifier + password
       const { error: createError } = await signIn.create({ identifier: email, password })
       if (createError) {
         setError(createError.message)
         return
       }
 
-      // Only finalize when sign-in is complete
       if (signIn.status !== "complete") {
         console.log("Sign-in status:", signIn.status)
         setError("Autenticação incompleta. Verifique suas credenciais.")
@@ -56,26 +47,20 @@ export default function SignInPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#0F1117] px-4">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
-        <div className="rounded-2xl border border-white/8 bg-[#1F2535] p-8">
+        <div className="rounded-2xl border border-border bg-card p-8">
           {/* Logo */}
-          <div className="mb-8 flex flex-col items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#00D060]">
-              <BoltIcon />
-            </div>
-            <div className="text-center">
-              <h1 className="text-lg font-semibold tracking-tight text-white">
-                SemanticZap
-              </h1>
-              <p className="mt-0.5 text-sm text-white/38">Sign in to your account</p>
-            </div>
+          <div className="mb-8 flex flex-col items-center gap-4">
+            <Image src="/semanticzap-light.svg" alt="SemanticZap" width={160} height={36} className="dark:hidden" priority />
+            <Image src="/semanticzap-dark.svg" alt="SemanticZap" width={160} height={36} className="hidden dark:block" priority />
+            <p className="text-sm text-muted-foreground">Sign in to your account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-xs font-medium text-white/50">
+              <label htmlFor="email" className="text-xs font-medium text-muted-foreground">
                 Email
               </label>
               <input
@@ -86,13 +71,13 @@ export default function SignInPage() {
                 placeholder="you@example.com"
                 required
                 autoComplete="email"
-                className="w-full rounded-lg border border-white/8 bg-[#0F1117] px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-[#00D060]/50 focus:outline-none focus:ring-1 focus:ring-[#00D060]/30"
+                className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
               />
             </div>
 
             {/* Password */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="password" className="text-xs font-medium text-white/50">
+              <label htmlFor="password" className="text-xs font-medium text-muted-foreground">
                 Password
               </label>
               <div className="relative">
@@ -104,12 +89,12 @@ export default function SignInPage() {
                   placeholder="••••••••"
                   required
                   autoComplete="current-password"
-                  className="w-full rounded-lg border border-white/8 bg-[#0F1117] px-4 py-2.5 pr-10 text-sm text-white placeholder:text-white/30 focus:border-[#00D060]/50 focus:outline-none focus:ring-1 focus:ring-[#00D060]/30"
+                  className="w-full rounded-lg border border-border bg-background px-4 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 transition-colors hover:text-white/60"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 transition-colors hover:text-muted-foreground"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -123,8 +108,8 @@ export default function SignInPage() {
 
             {/* Error */}
             {error && (
-              <div className="rounded-lg bg-red-500/10 px-3 py-2">
-                <p className="text-sm text-red-400">{error}</p>
+              <div className="rounded-lg bg-destructive/10 px-3 py-2">
+                <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
 
@@ -132,7 +117,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-[#00D060] py-2.5 text-sm font-medium text-[#081a0e] transition-colors hover:bg-[#00A84F] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting && (
                 <Loader2 size={16} strokeWidth={1.5} className="animate-spin" />
@@ -141,9 +126,9 @@ export default function SignInPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-xs text-white/38">
+          <p className="mt-6 text-center text-xs text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <Link href="/sign-up" className="text-[#00D060] hover:underline">
+            <Link href="/sign-up" className="text-primary hover:underline">
               Create one
             </Link>
           </p>

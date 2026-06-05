@@ -49,8 +49,8 @@ export function ModeToggle({ mode, conversationId, onModeChange }: ModeTogglePro
       className={cn(
         "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
         isHuman
-          ? "bg-amber-500/15 text-amber-400 hover:bg-amber-500/25"
-          : "bg-[#00D060]/12 text-[#00D060] hover:bg-[#00D060]/20"
+          ? "bg-amber-500/15 text-amber-600 hover:bg-amber-500/25 dark:text-amber-400"
+          : "bg-accent text-accent-foreground hover:bg-accent/80"
       )}
     >
       {loading ? (

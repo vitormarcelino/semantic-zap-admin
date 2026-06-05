@@ -10,7 +10,7 @@ export function SignOutButton() {
     <button
       type="button"
       onClick={() => signOut({ redirectUrl: "/sign-in" })}
-      className="flex items-center gap-1.5 text-sm text-white/40 transition-colors hover:text-white"
+      className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
     >
       <LogOut
         size={16}

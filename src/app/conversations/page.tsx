@@ -38,7 +38,7 @@ function ConversationsContent() {
   )
 
   return (
-    <div className="flex h-screen bg-[#0F1117]">
+    <div className="flex h-screen bg-background">
       <Sidebar />
 
       {/* Agent selector */}
@@ -53,8 +53,8 @@ function ConversationsContent() {
             onSelect={selectConversation}
           />
         ) : (
-          <div className="flex h-full items-center justify-center border-r border-white/8 bg-[#181C26]">
-            <p className="text-xs text-white/30">Select an agent</p>
+          <div className="flex h-full items-center justify-center border-r border-border bg-sidebar">
+            <p className="text-xs text-muted-foreground/50">Select an agent</p>
           </div>
         )}
       </div>
@@ -62,15 +62,15 @@ function ConversationsContent() {
       {/* Conversation view */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Inner header */}
-        <header className="flex shrink-0 items-center border-b border-white/8 px-6 py-4">
+        <header className="flex shrink-0 items-center border-b border-border px-6 py-4">
           <div className="flex items-center gap-2">
             <MessageSquare
               size={16}
-              className="text-white/40"
+              className="text-muted-foreground"
               strokeWidth={1.5}
               strokeLinecap="round"
             />
-            <h1 className="text-base font-semibold text-white">Conversations</h1>
+            <h1 className="text-base font-semibold text-foreground">Conversations</h1>
           </div>
         </header>
 

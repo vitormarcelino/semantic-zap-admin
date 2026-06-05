@@ -4,17 +4,10 @@ import { useState } from "react"
 import { useSignUp } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 
 type Step = "form" | "verify"
-
-function BoltIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M11 2L3 11H9.5L9 18L17 9H10.5L11 2Z" fill="white" strokeLinejoin="round" />
-    </svg>
-  )
-}
 
 interface PasswordFieldProps {
   id: string
@@ -29,7 +22,7 @@ interface PasswordFieldProps {
 function PasswordField({ id, label, value, onChange, autoComplete, show, onToggle }: PasswordFieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-xs font-medium text-white/50">
+      <label htmlFor={id} className="text-xs font-medium text-muted-foreground">
         {label}
       </label>
       <div className="relative">
@@ -41,12 +34,12 @@ function PasswordField({ id, label, value, onChange, autoComplete, show, onToggl
           placeholder="••••••••"
           required
           autoComplete={autoComplete}
-          className="w-full rounded-lg border border-white/8 bg-[#0F1117] px-4 py-2.5 pr-10 text-sm text-white placeholder:text-white/30 focus:border-[#00D060]/50 focus:outline-none focus:ring-1 focus:ring-[#00D060]/30"
+          className="w-full rounded-lg border border-border bg-background px-4 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
         />
         <button
           type="button"
           onClick={onToggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 transition-colors hover:text-white/60"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 transition-colors hover:text-muted-foreground"
           aria-label={show ? "Hide password" : "Show password"}
         >
           {show ? <EyeOff size={16} strokeWidth={1.5} /> : <Eye size={16} strokeWidth={1.5} />}
@@ -83,7 +76,6 @@ export default function SignUpPage() {
 
     const [firstName, ...rest] = name.trim().split(" ")
 
-    // Step 1: create account with email
     const { error: createError } = await signUp.create({
       emailAddress: email,
       firstName,
@@ -94,14 +86,12 @@ export default function SignUpPage() {
       return
     }
 
-    // Step 2: set password
     const { error: passwordError } = await signUp.password({ password })
     if (passwordError) {
       setError(passwordError.message)
       return
     }
 
-    // Step 3: trigger email verification code
     const { error: sendError } = await signUp.verifications.sendEmailCode()
     if (sendError) {
       setError(sendError.message)
@@ -115,14 +105,12 @@ export default function SignUpPage() {
     e.preventDefault()
     setError(null)
 
-    // Verify the code
     const { error: verifyError } = await signUp.verifications.verifyEmailCode({ code })
     if (verifyError) {
       setError(verifyError.message)
       return
     }
 
-    // Finalize — sets active session and navigates
     const { error: finalizeError } = await signUp.finalize({
       navigate: () => router.push("/dashboard"),
     })
@@ -132,29 +120,23 @@ export default function SignUpPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#0F1117] px-4 py-8">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
       <div className="w-full max-w-md">
-        <div className="rounded-2xl border border-white/8 bg-[#1F2535] p-8">
+        <div className="rounded-2xl border border-border bg-card p-8">
           {/* Logo */}
-          <div className="mb-8 flex flex-col items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#00D060]">
-              <BoltIcon />
-            </div>
-            <div className="text-center">
-              <h1 className="text-lg font-semibold tracking-tight text-white">
-                SemanticZap
-              </h1>
-              <p className="mt-0.5 text-sm text-white/38">
-                {step === "form" ? "Create your account" : "Verify your email"}
-              </p>
-            </div>
+          <div className="mb-8 flex flex-col items-center gap-4">
+            <Image src="/semanticzap-light.svg" alt="SemanticZap" width={160} height={36} className="dark:hidden" priority />
+            <Image src="/semanticzap-dark.svg" alt="SemanticZap" width={160} height={36} className="hidden dark:block" priority />
+            <p className="text-sm text-muted-foreground">
+              {step === "form" ? "Create your account" : "Verify your email"}
+            </p>
           </div>
 
           {step === "form" ? (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               {/* Name */}
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="name" className="text-xs font-medium text-white/50">
+                <label htmlFor="name" className="text-xs font-medium text-muted-foreground">
                   Full name
                 </label>
                 <input
@@ -165,13 +147,13 @@ export default function SignUpPage() {
                   placeholder="John Doe"
                   required
                   autoComplete="name"
-                  className="w-full rounded-lg border border-white/8 bg-[#0F1117] px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-[#00D060]/50 focus:outline-none focus:ring-1 focus:ring-[#00D060]/30"
+                  className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
                 />
               </div>
 
               {/* Email */}
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="email" className="text-xs font-medium text-white/50">
+                <label htmlFor="email" className="text-xs font-medium text-muted-foreground">
                   Email
                 </label>
                 <input
@@ -182,7 +164,7 @@ export default function SignUpPage() {
                   placeholder="you@example.com"
                   required
                   autoComplete="email"
-                  className="w-full rounded-lg border border-white/8 bg-[#0F1117] px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-[#00D060]/50 focus:outline-none focus:ring-1 focus:ring-[#00D060]/30"
+                  className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
                 />
               </div>
 
@@ -207,8 +189,8 @@ export default function SignUpPage() {
               />
 
               {error && (
-                <div className="rounded-lg bg-red-500/10 px-3 py-2">
-                  <p className="text-sm text-red-400">{error}</p>
+                <div className="rounded-lg bg-destructive/10 px-3 py-2">
+                  <p className="text-sm text-destructive">{error}</p>
                 </div>
               )}
 
@@ -218,7 +200,7 @@ export default function SignUpPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-[#00D060] py-2.5 text-sm font-medium text-[#081a0e] transition-colors hover:bg-[#00A84F] disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting && (
                   <Loader2 size={16} strokeWidth={1.5} className="animate-spin" />
@@ -228,13 +210,13 @@ export default function SignUpPage() {
             </form>
           ) : (
             <form onSubmit={handleVerify} className="flex flex-col gap-4">
-              <p className="text-center text-sm text-white/50">
+              <p className="text-center text-sm text-muted-foreground">
                 We sent a 6-digit code to{" "}
-                <span className="font-medium text-white">{email}</span>
+                <span className="font-medium text-foreground">{email}</span>
               </p>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="code" className="text-xs font-medium text-white/50">
+                <label htmlFor="code" className="text-xs font-medium text-muted-foreground">
                   Verification code
                 </label>
                 <input
@@ -248,20 +230,20 @@ export default function SignUpPage() {
                   placeholder="000000"
                   required
                   autoComplete="one-time-code"
-                  className="w-full rounded-lg border border-white/8 bg-[#0F1117] px-4 py-2.5 text-center font-mono text-xl tracking-[0.5em] text-white placeholder:text-white/20 focus:border-[#00D060]/50 focus:outline-none focus:ring-1 focus:ring-[#00D060]/30"
+                  className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-center font-mono text-xl tracking-[0.5em] text-foreground placeholder:text-muted-foreground/40 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
                 />
               </div>
 
               {error && (
-                <div className="rounded-lg bg-red-500/10 px-3 py-2">
-                  <p className="text-sm text-red-400">{error}</p>
+                <div className="rounded-lg bg-destructive/10 px-3 py-2">
+                  <p className="text-sm text-destructive">{error}</p>
                 </div>
               )}
 
               <button
                 type="submit"
                 disabled={isSubmitting || code.length < 6}
-                className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-[#00D060] py-2.5 text-sm font-medium text-[#081a0e] transition-colors hover:bg-[#00A84F] disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting && (
                   <Loader2 size={16} strokeWidth={1.5} className="animate-spin" />
@@ -276,7 +258,7 @@ export default function SignUpPage() {
                   setError(null)
                   setCode("")
                 }}
-                className="text-center text-xs text-white/38 transition-colors hover:text-white/60"
+                className="text-center text-xs text-muted-foreground transition-colors hover:text-foreground"
               >
                 Back to sign up
               </button>
@@ -284,9 +266,9 @@ export default function SignUpPage() {
           )}
 
           {step === "form" && (
-            <p className="mt-6 text-center text-xs text-white/38">
+            <p className="mt-6 text-center text-xs text-muted-foreground">
               Already have an account?{" "}
-              <Link href="/sign-in" className="text-[#00D060] hover:underline">
+              <Link href="/sign-in" className="text-primary hover:underline">
                 Sign in
               </Link>
             </p>
